@@ -265,10 +265,16 @@ abrir um link ─► hashChanged() ─► syncAdLibExtras(hash) ─► recria os
   colar o GABC copiado da página do canto.
 - A mesma janela lista os cantos da biblioteca, com uma lixeira para remover.
 - **Exportar e importar:** abaixo da lista, **"Export My chants"** gera um arquivo
-  `cantemus-my-chants-AAAA-MM-DD.json` com todos os cantos (com as partituras). No app, abre o
+  `my-chants-AAAA-MM-DD.mychants` com todos os cantos (com as partituras). No app, abre o
   menu de compartilhar do Android (WhatsApp, Drive, e-mail…); na web, baixa o arquivo.
   **"Import a file"** escolhe um arquivo desses e acrescenta os cantos que faltam; os que já
   existem ficam como estão. Serve de backup e para passar a biblioteca aos coralistas.
+- **Abrir o arquivo direto (app):** ao tocar num `.mychants` no WhatsApp, no Drive ou no app de
+  arquivos, o Android oferece **"Abrir com Cantemus"**; o app mostra a janela **"Import My
+  chants"** com os cantos do arquivo e o botão para acrescentá-los.
+- **Nome neutro de propósito:** a extensão `.mychants` e o formato `"my-chants"` não citam o
+  Cantemus, para que o Chant Tools possa usar os mesmos arquivos num eventual merge. Arquivos
+  antigos (`.json`, formato `"cantemus-my-chants"`) continuam sendo aceitos.
 - **Links compartilhados:** se a URL tiver cantos que o aparelho não tem (nem oficiais, nem na
   biblioteca), aparece o aviso **"Chants missing from this app"**, que baixa todos com um toque.
 
@@ -302,8 +308,10 @@ código), mas some se o app for desinstalado ou os dados do site forem apagados.
 | `checkGabc(texto)` | Valida o conteúdo; reconhece a resposta "Wrong id" do GregoBase |
 | `showAddDialog(opções)` | A janela "Add a chant from GregoBase" (adicionar, colar GABC, listar, remover) |
 | `offerMissing(ids, aoTerminar)` | A janela "Chants missing from this app" |
-| `exportText()`, `exportFile()` | Monta o arquivo (`{format: "cantemus-my-chants", version: 1, exported, chants}`, onde `chants` é o mesmo objeto do `localStorage`) e o entrega: `window.plugins.socialsharing` no app, download na web |
-| `importText(texto, isOfficial)` | Confere o formato e cada canto (`checkGabc`), acrescenta os novos e devolve `{added, already, invalid}` |
+| `exportText()`, `exportFile()` | Monta o arquivo (`{format: "my-chants", version: 1, exported, chants}`, onde `chants` é o mesmo objeto do `localStorage`) e o entrega: `window.plugins.socialsharing` no app, download na web |
+| `parseFile(texto)` | Confere o formato e cada canto (`checkGabc`); devolve `{chants, invalid}` |
+| `importText(texto, isOfficial)` | Acrescenta os cantos novos do arquivo e devolve `{added, already, invalid}` |
+| `showImportDialog(texto)` | A janela "Import My chants", para um arquivo aberto de outro app |
 
 **Estilo:** `css/my-chants.css` (claro e escuro, este via `html.dark`).
 
@@ -336,6 +344,16 @@ código), mas some se o app for desinstalado ou os dados do site forem apagados.
   compartilhar links com `navigator.share`.
 - A importação usa um `<input type="file">` comum, que o Cordova já abre no seletor de
   arquivos do Android.
+- **Abrir `.mychants` de outros apps** (só `cantemus-app`): o `config.xml` tem dois
+  `intent-filter` de `VIEW`: um para arquivos `application/json`, `application/octet-stream` e
+  `application/x-mychants` (o WhatsApp e o Drive quase nunca passam a extensão), outro para
+  qualquer tipo terminado em `.mychants` (gerenciadores de arquivos). Efeito colateral: o
+  Cantemus aparece em "Abrir com" de outros JSON e arquivos genéricos; se não for uma
+  biblioteca, a janela avisa. O `www/js/index.js` (`handleUrl` → `openMyChantsFile`) recebe a
+  URI `content://` pelo `cordova-webintent`, lê com `resolveLocalFileSystemURL`
+  (`cordova-plugin-file`) e chama `MyChants.showImportDialog`. Como a intent continua a mesma
+  quando a página recarrega, a URI já mostrada fica em `sessionStorage.openedMyChantsFile`.
+- Mudou o `config.xml`? Recrie a plataforma (`cordova platform rm android && cordova platform add android`).
 
 ### Dependências
 GregoBase (`download.php`); `cordova-plugin-advanced-http` e `cordova-plugin-x-socialsharing` (app); `localStorage`; jQuery;
