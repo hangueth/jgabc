@@ -312,6 +312,7 @@ var MyChants = (function() {
       $export.prop('disabled', !chants.length);
       if(!chants.length) return;
       $('<h5>My chants</h5>').appendTo($list);
+      $('<p class="my-chants-hint-inline"></p>').text('In the ad libitum menus, they are among the other chants, marked with *.').appendTo($list);
       var $ul = $('<ul></ul>').appendTo($list);
       chants.forEach(function(chant) {
         var $li = $('<li></li>').appendTo($ul);

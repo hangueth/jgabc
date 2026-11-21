@@ -61,6 +61,13 @@
 .my-chants-missing {
   padding-left: 18px;
 }
+.my-chants-hint-inline {
+  margin: 0 0 4px;
+  color: #666;
+}
+html.dark .my-chants-hint-inline {
+  color: #aaa;
+}
 .my-chants-list li {
   margin: 4px 0;
 }

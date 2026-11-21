@@ -263,8 +263,10 @@ abrir um link ─► hashChanged() ─► syncAdLibExtras(hash) ─► recria os
 ### O que faz
 - A última opção de cada menu ad libitum é **"Add a chant from GregoBase…"**. Ela abre uma
   janela em que se cola o **link ou o ID** do GregoBase (e, opcionalmente, um nome para o menu).
-- No **app**, o canto é baixado e guardado **no aparelho**; aparece no grupo **"My chants"** de
-  todos os menus e já fica selecionado.
+- No **app**, o canto é baixado e guardado **no aparelho**; aparece em todos os menus **no meio
+  dos cantos oficiais, em ordem alfabética, com um `*` no fim do nome** (ex.: *Ave verum (teste) \**),
+  e já fica selecionado. O `*` só aparece no menu; o nome guardado não muda. (Até 2026-11-21
+  ficavam num grupo "My chants" separado; o usuário preferiu tudo junto.)
 - Na **web**, o GregoBase bloqueia o download (veja *CORS* abaixo); a janela então pede para
   colar o GABC copiado da página do canto.
 - A mesma janela lista os cantos da biblioteca, com uma lixeira para remover.
@@ -323,7 +325,7 @@ código), mas some se o app for desinstalado ou os dados do site forem apagados.
 
 | Onde | O quê |
 |---|---|
-| `getAdLibMenuItems()` | Monta o menu: cantos oficiais + grupo "My chants" + "Add a chant from GregoBase…" (valor `add-my-chant`) |
+| `getAdLibMenuItems()` | Monta o menu: cantos oficiais com os da biblioteca encaixados em ordem alfabética (`localeCompare`, cada um antes do primeiro oficial que vem depois dele, para não mexer na ordem do Benjamin), com ` *` no nome; no fim, "Add a chant from GregoBase…" (valor `add-my-chant`) |
 | `refreshAdLibMenus()` | Refaz todos os menus ad libitum (e o molde dos extras) quando a biblioteca muda, mantendo as escolhas |
 | `openAddMyChant(select)` | Ao escolher "Add…": devolve o menu ao canto anterior e abre a janela; cada canto adicionado é selecionado ali |
 | início dos handlers `change` dos ad libitum | Desviam o valor `add-my-chant` para `openAddMyChant` |

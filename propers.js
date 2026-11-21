@@ -3596,12 +3596,18 @@ $(function(){
       children: e.children && e.children.map(mapNameToTitle)
     }
   };
-  // the ad libitum menu: the app's chants, then the user's own (My chants, in js/my-chants.js), then the option to add one
+  // the ad libitum menu: the app's chants with the user's own (My chants, in js/my-chants.js) among them in alphabetical
+  // order, marked with *, then the option to add one
   var addMyChantValue = 'add-my-chant';
   var getAdLibMenuItems = function() {
-    var myChants = MyChants.list();
-    return [{name:"Select ad lib. chant", id: ""}].concat(miscChants,
-      myChants.length? [{name: 'My chants', children: myChants}] : [],
+    var items = miscChants.slice();
+    // each chant goes before the first one that comes after it, so the app's chants keep their order
+    MyChants.list().forEach(function(chant) {
+      var i = 0;
+      while(i < items.length && items[i].name.localeCompare(chant.name) <= 0) ++i;
+      items.splice(i, 0, {name: chant.name + ' *', id: chant.id});
+    });
+    return [{name:"Select ad lib. chant", id: ""}].concat(items,
       [{name: 'Add a chant from GregoBase…', id: addMyChantValue}]).map(mapNameToTitle);
   };
   populate(getAdLibMenuItems(), $('#selCustom'));
