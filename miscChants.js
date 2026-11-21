@@ -121,6 +121,7 @@ miscChants = [
   { name: "Lucis Creator optime (another chant ad libitum)", id: 2432 },
   { name: "Lucis Creator optime (another chant)", id: 2095 },
   { name: "Maria Mater gratiæ", id: 3030 },
+  { name: "Media vita", id: 3973 },
   {
     name: "O Antiphons",
     children: [
