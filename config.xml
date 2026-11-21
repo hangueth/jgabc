@@ -33,7 +33,17 @@
         <resource-file src="res/android/values-night-v34/cdv_colors.xml" target="app/src/main/res/values-night-v34/cdv_colors.xml" />
         <resource-file src="res/screen/android/splashscreen-night.xml" target="app/src/main/res/drawable-night/ic_cdv_splashscreen.xml" />
         <config-file parent="/*/application/activity" target="AndroidManifest.xml">
+            <!-- Cantemus's own links, verified by https://hangueth.github.io/.well-known/assetlinks.json -->
             <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="hangueth.github.io" android:pathPrefix="/jgabc" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+            </intent-filter>
+            <!-- Chant Tools links, which open in Chant Tools when it's installed; Cantemus can open them if chosen in the app's settings -->
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />

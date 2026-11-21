@@ -75,7 +75,7 @@ var app = {
             app.onResume();
             return;
         }
-        var urlRegex = /\/\/bbloomf\.github\.io\/jgabc\/([^#?]*)([#?].*)?$/i;
+        var urlRegex = /\/\/(?:hangueth|bbloomf)\.github\.io\/jgabc\/([^#?]*)([#?].*)?$/i;
         var match = urlRegex.exec(url);
         if(match) {
             // The website serves extensionless URLs (e.g. /jgabc/propers), but the
