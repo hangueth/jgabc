@@ -108,7 +108,7 @@ $(function(){
       var onError = function(msg) {
         console.log("Sharing failed with message: " + msg);
       }
-      navigator.share({ url: 'http://bbloomf.github.io/jgabc/propers.html' + location.hash }).then(onSuccess).catch(onError);
+      navigator.share({ url: 'https://hangueth.github.io/jgabc/propers.html' + location.hash }).then(onSuccess).catch(onError);
   });
 
   var reFullBarsWithNoPunctuation = /([^;:,.!?\s])\s*\*/g;
