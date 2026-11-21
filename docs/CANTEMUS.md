@@ -264,6 +264,11 @@ abrir um link ─► hashChanged() ─► syncAdLibExtras(hash) ─► recria os
 - Na **web**, o GregoBase bloqueia o download (veja *CORS* abaixo); a janela então pede para
   colar o GABC copiado da página do canto.
 - A mesma janela lista os cantos da biblioteca, com uma lixeira para remover.
+- **Exportar e importar:** abaixo da lista, **"Export My chants"** gera um arquivo
+  `cantemus-my-chants-AAAA-MM-DD.json` com todos os cantos (com as partituras). No app, abre o
+  menu de compartilhar do Android (WhatsApp, Drive, e-mail…); na web, baixa o arquivo.
+  **"Import a file"** escolhe um arquivo desses e acrescenta os cantos que faltam; os que já
+  existem ficam como estão. Serve de backup e para passar a biblioteca aos coralistas.
 - **Links compartilhados:** se a URL tiver cantos que o aparelho não tem (nem oficiais, nem na
   biblioteca), aparece o aviso **"Chants missing from this app"**, que baixa todos com um toque.
 
@@ -297,6 +302,8 @@ código), mas some se o app for desinstalado ou os dados do site forem apagados.
 | `checkGabc(texto)` | Valida o conteúdo; reconhece a resposta "Wrong id" do GregoBase |
 | `showAddDialog(opções)` | A janela "Add a chant from GregoBase" (adicionar, colar GABC, listar, remover) |
 | `offerMissing(ids, aoTerminar)` | A janela "Chants missing from this app" |
+| `exportText()`, `exportFile()` | Monta o arquivo (`{format: "cantemus-my-chants", version: 1, exported, chants}`, onde `chants` é o mesmo objeto do `localStorage`) e o entrega: `window.plugins.socialsharing` no app, download na web |
+| `importText(texto, isOfficial)` | Confere o formato e cada canto (`checkGabc`), acrescenta os novos e devolve `{added, already, invalid}` |
 
 **Estilo:** `css/my-chants.css` (claro e escuro, este via `html.dark`).
 
@@ -321,8 +328,17 @@ código), mas some se o app for desinstalado ou os dados do site forem apagados.
   navegador, sem essa restrição. Ele só existe no branch `cantemus-app` (`package.json`).
 - Se um dia o GregoBase liberar o CORS, a versão web passa a baixar sozinha, sem mudar nada.
 
+### Exportar no app: o plugin de compartilhar
+- A WebView do app **ignora downloads**, por isso a exportação usa o
+  **`cordova-plugin-x-socialsharing`** (6.0.4, só no branch `cantemus-app`): o arquivo vai como
+  `df:nome.json;data:application/json;base64,…`; o plugin o grava no cache e abre o menu de
+  compartilhar do Android. O Benjamin usou esse plugin até 2026 e o tirou quando passou a
+  compartilhar links com `navigator.share`.
+- A importação usa um `<input type="file">` comum, que o Cordova já abre no seletor de
+  arquivos do Android.
+
 ### Dependências
-GregoBase (`download.php`); `cordova-plugin-advanced-http` (app); `localStorage`; jQuery;
+GregoBase (`download.php`); `cordova-plugin-advanced-http` e `cordova-plugin-x-socialsharing` (app); `localStorage`; jQuery;
 funções do Benjamin: `populate`, `mapNameToTitle`, `miscChants`, `updatePart`, `hashChanged`,
 `lastHandledHash`, `selCustom`; e, da funcionalidade do botão +, `$adLibTemplate`, `adLibGroups`
 e `syncAdLibExtras`. **My chants depende do botão +** (não funciona sem ele).
@@ -331,7 +347,8 @@ e `syncAdLibExtras`. **My chants depende do botão +** (não funciona sem ele).
 - Os cantos entram **sem a limpeza do latim** do `download-gabc.js` (ela só roda em Node).
   Aparecem bem, com pequenas diferenças de acentuação.
 - Sem busca dentro do app: o usuário procura no site do GregoBase e cola o link.
-- A biblioteca é **por aparelho**; ainda não há exportar/importar (backup).
+- A biblioteca é **por aparelho**; para levá-la a outro, use exportar/importar.
+- Importar **não substitui** um canto que já existe com o mesmo ID (nem o nome dado a ele).
 - Só funciona em ad libitum (não nos próprios nem no ordinário).
 - Os textos da interface estão em inglês, como o resto do app.
 
@@ -432,6 +449,19 @@ cd "Cantemus/jgabc"
 python3 -m http.server 8080 --bind 127.0.0.1
 # abrir http://127.0.0.1:8080/propers.html  (Ctrl+Shift+R para recarregar sem cache)
 ```
+
+### Testar o app no emulador (sem celular)
+Há um emulador Android instalado (`cantemus-test`, Android 15, imagem `google_apis` x86_64):
+```bash
+source ~/.local/opt/android-env.sh
+$ANDROID_HOME/emulator/emulator -avd cantemus-test -no-window -no-audio -no-snapshot -gpu guest &
+adb wait-for-device && adb install -r platforms/android/app/build/outputs/apk/debug/app-debug.apk
+adb exec-out screencap -p > tela.png        # foto da tela;  adb shell input tap X Y  para tocar
+# para rodar JS na WebView (só APK de depuração): encaminhar o DevTools e usar puppeteer.connect
+adb forward tcp:9222 localabstract:webview_devtools_remote_$(adb shell pidof io.github.hangueth.cantemus)
+```
+Com `-gpu swiftshader_indirect` o emulador travou (falha de segmentação); `-gpu guest` funciona.
+O APK de release não instala por cima do de depuração (chaves diferentes): desinstale antes.
 
 ### Adicionar um canto oficial
 ```bash
