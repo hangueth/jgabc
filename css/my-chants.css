@@ -69,12 +69,23 @@
 }
 .my-chants-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+}
+.my-chants-hint {
+  margin: 16px 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid #ddd;
+  color: #666;
 }
 @media screen {
   html.dark .my-chants-dialog {
     background: #1a1a1a;
     color: #eee;
+  }
+  html.dark .my-chants-hint {
+    border-top-color: #444;
+    color: #aaa;
   }
   html.dark .my-chants-head {
     border-bottom-color: #444;

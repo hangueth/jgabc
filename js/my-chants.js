@@ -98,6 +98,96 @@ var MyChants = (function() {
     });
   }
 
+  // Export and import: the whole library in one JSON file, with the scores, so that it can be restored or given to
+  // another device (a choir member's phone) without depending on GregoBase.
+  var fileFormat = 'cantemus-my-chants';
+  function exportText() {
+    return JSON.stringify({ format: fileFormat, version: 1, exported: new Date().toISOString(), chants: load() }, null, 1);
+  }
+  function exportFileName() {
+    return 'cantemus-my-chants-' + new Date().toISOString().slice(0, 10) + '.json';
+  }
+  function base64(text) {
+    var bytes = new TextEncoder().encode(text), binary = '';
+    for(var i = 0; i < bytes.length; i += 0x8000) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    }
+    return btoa(binary);
+  }
+  // Gives the library file to the user: in the app, through the phone's share menu (WhatsApp, Drive, e-mail…),
+  // with cordova-plugin-x-socialsharing, since the app's web view ignores downloads; on the web, as a download.
+  function exportFile() {
+    var text = exportText(), name = exportFileName(),
+        sharing = window.cordova && window.plugins && window.plugins.socialsharing;
+    return new Promise(function(resolve, reject) {
+      if(sharing) {
+        sharing.shareWithOptions({
+          files: ['df:' + name + ';data:application/json;base64,' + base64(text)],
+          chooserTitle: 'Save or send My chants'
+        }, resolve, function(error) { reject(new Error('The file could not be shared (' + error + ').')); });
+      } else if(window.cordova) {
+        reject(new Error("This version of the app can't export files."));
+      } else {
+        var url = URL.createObjectURL(new Blob([text], { type: 'application/json' })),
+            link = document.createElement('a');
+        link.href = url;
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(function() { URL.revokeObjectURL(url); }, 60000);
+        resolve();
+      }
+    });
+  }
+  // Adds the chants of an exported file to the library; chants already in it (or official ones) are kept as they are.
+  // Returns {added: [names], already: count, invalid: count}.
+  function importText(text, isOfficial) {
+    var data;
+    try {
+      data = JSON.parse(text);
+    } catch(e) {}
+    if(!data || data.format != fileFormat || !data.chants || typeof(data.chants) != 'object') {
+      throw new Error("This isn't a My chants file (exported with “Export My chants”).");
+    }
+    var lib = load(), result = { added: [], already: 0, invalid: 0 };
+    Object.keys(data.chants).forEach(function(id) {
+      var chant = data.chants[id], gabc;
+      try {
+        if(!/^\d+$/.test(id) || !chant || typeof(chant.name) != 'string') throw new Error();
+        gabc = checkGabc(chant.gabc);
+      } catch(e) {
+        return result.invalid++;
+      }
+      if(lib[id] || (isOfficial && isOfficial(id))) return result.already++;
+      lib[id] = { name: chant.name.trim() || headerValue(gabc, 'name') || 'GregoBase ' + id, gabc: gabc,
+        added: new Date().toISOString() };
+      result.added.push(lib[id].name);
+    });
+    if(result.added.length) save(lib);
+    return result;
+  }
+  function readFile(file) {
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function() { resolve(reader.result); };
+      reader.onerror = function() { reject(new Error('The file could not be read.')); };
+      reader.readAsText(file);
+    });
+  }
+  function plural(n, one, many) {
+    return n + ' ' + (n == 1? one : many);
+  }
+  function importSummary(result) {
+    var parts = [];
+    if(result.added.length) parts.push(plural(result.added.length, 'chant was', 'chants were') + ' added');
+    if(result.already) parts.push(plural(result.already, 'was', 'were') + ' already in the app');
+    if(result.invalid) parts.push(plural(result.invalid, 'was', 'were') + ' damaged and left out');
+    if(!parts.length) return 'The file has no chants.';
+    var text = parts.join('; ') + '.';
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
   // a simple dialog: returns {$overlay, $body, close}
   function dialog(title) {
     var $overlay = $('<div class="my-chants-overlay"></div>'),
@@ -138,7 +228,33 @@ var MyChants = (function() {
         $pasteText = $('<p></p>').appendTo($paste),
         $gabc = $('<textarea class="form-control" rows="6" spellcheck="false" placeholder="Paste the GABC here"></textarea>').appendTo($paste),
         $addPasted = $('<button class="btn btn-sm btn-primary">Add the pasted chant</button>').appendTo($paste),
-        $list = $('<div class="my-chants-list"></div>').appendTo($body);
+        $list = $('<div class="my-chants-list"></div>').appendTo($body),
+        $files = $('<div class="my-chants-buttons my-chants-files"></div>').appendTo($body),
+        $export = $('<button class="btn btn-sm btn-default"><span class="glyphicon glyphicon-export"></span> Export My chants</button>').appendTo($files),
+        $import = $('<button class="btn btn-sm btn-default"><span class="glyphicon glyphicon-import"></span> Import a file</button>').appendTo($files),
+        $file = $('<input type="file" style="display: none">').appendTo($files),
+        $fileStatus = $('<div class="my-chants-status" aria-live="polite"></div>').appendTo($body);
+    $('<p class="my-chants-hint"></p>').text('Export saves all your chants in one file, as a backup or to send to other singers; ' +
+      'Import adds the chants of such a file.').insertBefore($files);
+    $export.click(function(e) {
+      e.preventDefault();
+      status($fileStatus, '');
+      exportFile().catch(function(error) { status($fileStatus, error.message, true); });
+    });
+    $import.click(function(e) {
+      e.preventDefault();
+      $file.val('').click();
+    });
+    $file.on('change', function() {
+      var file = this.files && this.files[0];
+      if(!file) return;
+      status($fileStatus, 'Reading ' + file.name + '…');
+      readFile(file).then(function(text) {
+        var result = importText(text, isOfficial);
+        status($fileStatus, importSummary(result));
+        renderList();
+      }).catch(function(error) { status($fileStatus, error.message, true); });
+    });
     var added = function(id, name) {
       status($status, '“' + name + '” was added to My chants.');
       $input.val('');
@@ -182,6 +298,7 @@ var MyChants = (function() {
     function renderList() {
       var chants = list();
       $list.empty();
+      $export.prop('disabled', !chants.length);
       if(!chants.length) return;
       $('<h5>My chants</h5>').appendTo($list);
       var $ul = $('<ul></ul>').appendTo($list);
@@ -246,6 +363,7 @@ var MyChants = (function() {
 
   return {
     get: get, list: list, add: add, remove: remove, onChange: onChange,
-    parseId: parseId, install: install, showAddDialog: showAddDialog, offerMissing: offerMissing
+    parseId: parseId, install: install, showAddDialog: showAddDialog, offerMissing: offerMissing,
+    exportText: exportText, importText: importText
   };
 })();
