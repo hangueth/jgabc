@@ -122,6 +122,7 @@ miscChants = [
   { name: "Lucis Creator optime (another chant)", id: 2095 },
   { name: "Maria Mater gratiæ", id: 3030 },
   { name: "Media vita", id: 3973 },
+  { name: "Miserere mei Deus (cantus prior)", id: 14256 },
   {
     name: "O Antiphons",
     children: [
@@ -196,6 +197,7 @@ miscChants = [
   { name: "Veni Creator Spiritus", id: 2923 },
   { name: "Veni Sancte Spiritus reple", id: 2813 },
   { name: "Veni veni Emmanuel", id: 7426 },
+  { name: "Venite populi", id: 3351 },
   { name: "Verbum bonum et suave", id: 4086 },
   { name: "Verbum supernum prodiens nec", id: 53 },
   { name: "Vexilla Christus", id: 2588 },
