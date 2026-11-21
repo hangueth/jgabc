@@ -1,0 +1,499 @@
+# Cantemus: documentação técnica
+
+O **Cantemus** é uma versão modificada (um *fork*) do **Chant Tools** de Benjamin Bloomfield
+(<https://github.com/bbloomf/jgabc>), feita para as necessidades de um coral: mais cantos
+ad libitum, vários cantos no mesmo momento da Missa e uma biblioteca pessoal de cantos do
+GregoBase.
+
+Este documento explica **o que foi mudado, onde fica cada coisa, como as peças se ligam e
+do que cada uma depende**. Para o histórico de trabalho e os próximos passos, veja o diário
+de bordo (`DIARIO-DE-BORDO.md`, na pasta do projeto, fora do repositório).
+
+> **Como ler esta documentação:** cada funcionalidade tem as mesmas seções: *o que faz*
+> (para quem usa), *como funciona* (para quem mantém o código), *arquivos*, *dependências*
+> e *limitações*. Nomes de funções aparecem em `código`. Procure-os no arquivo com Ctrl+F;
+> os números de linha mudam a cada edição, os nomes não.
+
+---
+
+## Sumário
+
+1. [Visão geral do projeto](#1-visão-geral-do-projeto)
+2. [Como o Chant Tools funciona por dentro](#2-como-o-chant-tools-funciona-por-dentro)
+3. [Funcionalidade: cantos ad libitum adicionados](#3-funcionalidade-cantos-ad-libitum-adicionados)
+4. [Funcionalidade: vários cantos por ad libitum (botão +)](#4-funcionalidade-vários-cantos-por-ad-libitum-botão-)
+5. [Funcionalidade: My chants (biblioteca pessoal)](#5-funcionalidade-my-chants-biblioteca-pessoal)
+6. [Funcionalidade: endereço próprio e links do app](#6-funcionalidade-endereço-próprio-e-links-do-app)
+7. [Funcionalidade: identidade do app (Cantemus)](#7-funcionalidade-identidade-do-app-cantemus)
+8. [Mapa de dependências](#8-mapa-de-dependências)
+9. [Ambiente e comandos](#9-ambiente-e-comandos)
+10. [Como trazer as atualizações do Benjamin](#10-como-trazer-as-atualizações-do-benjamin)
+11. [Cuidados e armadilhas conhecidas](#11-cuidados-e-armadilhas-conhecidas)
+
+---
+
+## 1. Visão geral do projeto
+
+### Repositórios e sites
+
+| O quê | Onde | Para quê |
+|---|---|---|
+| Original do Benjamin | `github.com/bbloomf/jgabc` (remoto `upstream`) | Fonte das atualizações oficiais |
+| Fork do Cantemus | `github.com/hangueth/jgabc` (remoto `origin`) | Nosso código |
+| Site do Cantemus | <https://hangueth.github.io/jgabc/propers.html> | Versão web, publicada pelo GitHub Pages a partir do branch `cantemus` |
+| Raiz do domínio | `github.com/hangueth/hangueth.github.io` | Só o `.well-known/assetlinks.json` (verificação dos links no Android) e um redirecionamento |
+
+### Branches (ramos do código)
+
+```
+upstream/master ─────────────┬──────────────► (atualizações do Benjamin)
+                             │
+                 multiple-ad-libitum           ← só o botão +, pronto para oferecer ao Benjamin
+                             │                    (issue bbloomf/jgabc#126)
+                             ▼
+                          cantemus             ← versão web do Cantemus: tudo o que é nosso
+                             │                    (publicada em hangueth.github.io/jgabc)
+                             ▼ (merge)
+upstream/cordova ──► cantemus-app             ← o app Android (pasta jgabc-cordova)
+```
+
+- **`master`**: cópia do original, sem mudanças nossas.
+- **`multiple-ad-libitum`**: só a funcionalidade do botão **+**. Fica separada para poder virar
+  um *pull request* para o Benjamin sem levar junto o resto.
+- **`cantemus`**: a versão web completa do Cantemus (cantos, botão +, My chants, links próprios).
+- **`cantemus-app`**: o app. Nasce do branch `cordova` do Benjamin e recebe o `cantemus` por merge.
+
+### Pastas no computador
+
+```
+Chat Tools/
+├── jgabc/            ← checkout principal (branches master, multiple-ad-libitum, cantemus)
+├── jgabc-cordova/    ← "worktree" do mesmo repositório, no branch cantemus-app (o app)
+├── Partituras/       ← PDFs e imagens de partituras enviadas para identificar
+├── Cantemus-*.apk    ← APKs gerados para teste
+├── DIARIO-DE-BORDO.md
+└── CLAUDE.md         ← orientações para o Claude nas próximas sessões
+```
+
+> **Worktree** é uma segunda pasta ligada ao mesmo repositório Git, com outro branch aberto.
+> Assim a versão web e o app ficam abertos ao mesmo tempo, sem trocar de branch.
+
+---
+
+## 2. Como o Chant Tools funciona por dentro
+
+É preciso entender estas peças do original para entender as nossas mudanças.
+
+### 2.1. Páginas e scripts
+
+- O app é um **site estático**: HTML, CSS e JavaScript com jQuery, sem framework e sem servidor.
+- A página principal para nós é a **Propers Tool** (`propers.html` + `propers.js`). Ela monta a
+  Missa: próprios, ordinário e os **ad libitum**.
+- As partituras são desenhadas pela biblioteca **Exsurge** (`exsurge.min.js`, compilada,
+  não editamos).
+- **Partituras** são arquivos **GABC** (formato de texto do projeto Gregorio) em `gabc/<id>.gabc`,
+  em que `<id>` é o **ID do canto no GregoBase** (<https://gregobase.selapa.net>).
+
+### 2.2. Os ad libitum no original
+
+- `propers.html` tem **um** bloco modelo `#divCustom` (part `custom`).
+- Na inicialização, `propers.js` clona esse modelo para criar **quatro** ad libitum:
+  `custom1` (início), `custom2` (após o Ofertório), `custom3` (após a Comunhão) e
+  `custom4` (após o Ite).
+- O menu de cada um é preenchido com `miscChants` (arquivo `miscChants.js`).
+- Escolher um canto chama `updatePart(part)`, que baixa `gabc/<id>.gabc` e desenha a partitura.
+
+### 2.3. O estado fica na URL
+
+Tudo o que se escolhe vai para o "hash" da URL (a parte depois do `#`). Exemplo:
+
+```
+propers.html#sunday=Adv1#custom3=2014
+```
+
+- `addToHash()` grava; `hashChanged()` lê e reaplica (ao abrir o link, voltar etc.).
+- Por isso **um link compartilhado reproduz a Missa inteira**. As nossas funcionalidades seguem
+  a mesma regra.
+
+### 2.4. De onde vêm as partituras: `download-gabc.js`
+
+Script **Node.js** (roda no computador, não no app) que:
+
+1. baixa do GregoBase todos os IDs listados (`ids` para os próprios e `miscChantIDs` para os
+   ad libitum);
+2. **limpa o latim** (`gabc-latin-normalization.js`, `gabc-latin-syllables.js`,
+   `gabc-latin-accents.js`): acentos, sílabas, "æ" etc.;
+3. grava `gabc/<id>.gabc` e **gera** `miscChants.js`, `texts.js`, `incipits.js` e `gabc-files.html`.
+
+> `miscChants.js` **é gerado**. Para mudar o menu, mude o `download-gabc.js` e rode o script.
+
+### 2.5. O app Android (Cordova)
+
+- O app é o mesmo site, embrulhado pelo **Cordova** (um navegador dentro de um app nativo).
+- No branch `cordova` do Benjamin, o site fica em `www/`; `config.xml` descreve o app; os
+  plugins nativos ficam em `package.json`.
+- `www/js/index.js` só existe no app: recebe os links abertos no Android (`handleUrl`) e
+  restaura a última Missa ao reabrir o app (`onResume`, via `localStorage.savedHash`).
+- `www/propers.js` do app tem **uma diferença** em relação ao do site: o botão de compartilhar
+  copia o link quando o celular não oferece o menu de compartilhamento.
+
+---
+
+## 3. Funcionalidade: cantos ad libitum adicionados
+
+### O que faz
+Acrescenta cantos à lista ad libitum oficial (o mesmo menu dos que já existiam).
+
+### Cantos adicionados
+
+| Canto | GregoBase | Fonte / versão | Observação |
+|---|---|---|---|
+| Media vita | 3973 | Cantus selecti, 1957 (Solesmes) | Responsório, modo 4 |
+| Miserere mei Deus (cantus prior) | 14256 | Puellae Charitatis | Salmo 50 completo (22 versículos) |
+| Venite populi | 3351 | Cantus selecti, 1957 (Solesmes) | |
+| Gaude Joseph | 15251 | | Modo 5 |
+| Jesu corona Virginum | 7253 | Antiphonale Monasticum, 1934 | Hino, modo 8 |
+| Audi benigne Conditor (monastic) | 9732 | Antiphonale Monasticum, 1934 | Diferente do 1830 (Liber Usualis), que já existia |
+| Salve festa dies | 8241 | Cantus selecti, 1957 / Liber antiphonarius | Versão da Páscoa (não a 8716, de Corpus Christi) |
+
+### Como funciona
+1. O ID entra no fim da lista `miscChantIDs` em `download-gabc.js`.
+2. Se o nome do GregoBase não serve (por exemplo, dois cantos com o mesmo nome), o nome do menu
+   vai em **`miscChantNames`** (mapa `ID → nome`), criado por nós no `download-gabc.js`.
+   Ele muda só o nome no menu; o cabeçalho do arquivo `.gabc` continua com o nome original.
+3. Rodar `node download-gabc.js` baixa tudo de novo e regenera os arquivos (seção 2.4).
+
+### Arquivos
+`download-gabc.js` (listas), `gabc/<id>.gabc` (gerados), `miscChants.js`, `texts.js`,
+`incipits.js`, `gabc-files.html` (gerados).
+
+### Dependências
+GregoBase no ar; Node.js; `npm install` feito na pasta `jgabc`.
+
+### Como identificar um canto a partir de uma partitura
+1. Pelas primeiras palavras, procurar no índice do GregoBase (`incipit.php?letter=X`).
+2. Baixar o GABC de cada versão candidata
+   (`download.php?format=gabc&elem=1&id=<id>`) e comparar modo, clave, barras e as primeiras
+   neumas com a imagem.
+3. Conferir o texto completo (versículos, doxologia).
+4. Arquivos baixados do GregoBase já trazem no nome o tipo, o canto e a versão
+   (ex.: `va--venite_populi--solesmes_1957.pdf`).
+
+### Limitações
+- Rodar o script baixa **todos** os ~1.750 cantos (alguns minutos) e pode trazer correções
+  que o GregoBase tenha feito em cantos antigos. Confira o `git diff` antes do commit.
+
+---
+
+## 4. Funcionalidade: vários cantos por ad libitum (botão +)
+
+**Branch:** `multiple-ad-libitum` (e incluída em `cantemus`). **Status:** oferecida ao Benjamin
+na issue <https://github.com/bbloomf/jgabc/issues/126>, aguardando resposta.
+
+### O que faz
+- Cada um dos 4 ad libitum ganha um botão **+**. Cada clique acrescenta mais um canto logo
+  abaixo (depois dos extras que já existirem ali).
+- Os extras têm um **×** para removê-los.
+- Os extras entram no PDF e no menu "Include in PDF", na ordem da página.
+- Tudo fica no link: abrir ou compartilhar a URL reproduz os extras.
+- "Clear selections" remove os extras.
+
+### Como funciona
+
+**Nomes das partes.** Os 4 originais são `custom1`…`custom4`. Os extras recebem `custom5`,
+`custom6`… (um contador, `nextAdLibIndex`), não importa onde estejam. Cada extra guarda o
+**grupo** (o ad libitum ao qual pertence) no atributo `ad-lib-group`.
+
+> Os nomes precisam terminar em número (`custom7`, e não `custom3b`), porque o código original
+> descobre a parte pelo id do elemento com a expressão `/[A-Z][a-z]+\d*$/`.
+
+**Formato na URL.** Os extras de cada grupo ficam numa chave só, em ordem:
+
+```
+#custom3=2014#custom3more=3973,3020,no
+```
+
+significa: no ad libitum da Comunhão (`custom3`), o canto 2014; depois dele, mais três: 3973,
+3020 e um ainda sem canto (`no`).
+
+**Funções** (em `propers.js`, logo depois do tratamento dos menus `[part^=custom] select`):
+
+| Função | Papel |
+|---|---|
+| `$adLibTemplate` | Cópia "limpa" do bloco `#divCustom1`, feita antes de qualquer canto ser desenhado; é o molde dos extras |
+| `addAdLibExtra(group, id)` | Cria um extra: clona o molde, renomeia ids, insere na página e no menu "Include in PDF", cria `sel[part]` e chama `updatePart` |
+| `removeAdLibExtra(part)` | Remove o bloco, a entrada do PDF e o estado (`sel`, `selCustom`, `includePropers`) |
+| `removeAllAdLibExtras()` | Usada por "Clear selections" |
+| `getAdLibExtrasHash()` | Monta as chaves `custom<n>more` a partir da página |
+| `syncAdLibExtras(hash)` | O caminho inverso: cria, remove e seleciona extras para bater com a URL. É chamada em `hashChanged()` |
+| handler `change` em `[ad-lib-group] select` | Trata a troca de canto num extra (os originais têm o handler do Benjamin) |
+| handlers `.btn-ad-lib-add` / `.btn-ad-lib-remove` | Os botões + e × |
+
+**CSS:** `.child-main.ad-lib-menu` em `propers.css` mantém o botão na linha do menu
+(o menu encolhe; importante no celular).
+
+### Fluxo ao clicar em +
+
+```
+clique no + ─► addAdLibExtra(grupo) ─► bloco novo na página + entrada no "Include in PDF"
+            └► addToHash(getAdLibExtrasHash()) ─► URL ganha custom<n>more=...
+escolher canto no extra ─► handler change ─► updatePart(part) ─► baixa e desenha o GABC
+abrir um link ─► hashChanged() ─► syncAdLibExtras(hash) ─► recria os extras
+```
+
+### Dependências (no código do Benjamin)
+`updatePart`, `sel`, `selCustom`, `includePropers`, `makeChantContextForSel`, `addToHash`,
+`hashChanged`, `updateQuickPdf`, `getPdfPartList` (lê os `[part]` em ordem de página) e
+`clearSelections`. Se o Benjamin renomear qualquer um deles, esta funcionalidade precisa de ajuste.
+
+### Limitações
+- O **+** só existe nos 4 pontos originais; não dá para criar um ad libitum num lugar novo.
+- Não dá para reordenar extras (só remover e adicionar de novo).
+
+---
+
+## 5. Funcionalidade: My chants (biblioteca pessoal)
+
+**Branch:** `cantemus` (não oferecida ao Benjamin ainda).
+
+### O que faz
+- A última opção de cada menu ad libitum é **"Add a chant from GregoBase…"**. Ela abre uma
+  janela em que se cola o **link ou o ID** do GregoBase (e, opcionalmente, um nome para o menu).
+- No **app**, o canto é baixado e guardado **no aparelho**; aparece no grupo **"My chants"** de
+  todos os menus e já fica selecionado.
+- Na **web**, o GregoBase bloqueia o download (veja *CORS* abaixo); a janela então pede para
+  colar o GABC copiado da página do canto.
+- A mesma janela lista os cantos da biblioteca, com uma lixeira para remover.
+- **Links compartilhados:** se a URL tiver cantos que o aparelho não tem (nem oficiais, nem na
+  biblioteca), aparece o aviso **"Chants missing from this app"**, que baixa todos com um toque.
+
+### Por que funciona com links compartilhados
+Os cantos da biblioteca são guardados pelo **mesmo ID do GregoBase** que os cantos oficiais
+usam. Então a URL não muda de formato (`#custom1=9085`), e se um dia o Benjamin oficializar o
+mesmo canto, o link continua valendo.
+
+### Como funciona
+
+**Armazenamento.** `localStorage["myChants"]`, um JSON:
+
+```json
+{
+  "9085": { "name": "Jesu corona Virginum (In Tempore Paschali)", "gabc": "name: ...\n%%\n(c4)...", "added": "2026-11-21T03:10:00.000Z" }
+}
+```
+
+O `localStorage` é do aparelho/navegador: **sobrevive a atualizações do app** (que trocam só o
+código), mas some se o app for desinstalado ou os dados do site forem apagados.
+
+**Módulo `js/my-chants.js`** (objeto global `MyChants`, independente do `propers.js`):
+
+| Função | Papel |
+|---|---|
+| `get(id)`, `list()`, `add(id, name, gabc)`, `remove(id)` | Biblioteca no `localStorage` |
+| `onChange(f)` | Avisa quem precisa (os menus) quando a biblioteca muda |
+| `parseId(texto)` | Aceita `3973`, `…chant.php?id=3973` ou o link de download |
+| `download(id)` | Baixa o GABC: usa `cordova.plugin.http` se existir (app); senão tenta `fetch` (web, falha por CORS e marca o erro com `canPaste`) |
+| `install(id, nome)` | `download` + `add`; o nome vem do cabeçalho `name:` do GABC |
+| `checkGabc(texto)` | Valida o conteúdo; reconhece a resposta "Wrong id" do GregoBase |
+| `showAddDialog(opções)` | A janela "Add a chant from GregoBase" (adicionar, colar GABC, listar, remover) |
+| `offerMissing(ids, aoTerminar)` | A janela "Chants missing from this app" |
+
+**Estilo:** `css/my-chants.css` (claro e escuro, este via `html.dark`).
+
+**Ligação com `propers.js`** (o mínimo possível no código do Benjamin):
+
+| Onde | O quê |
+|---|---|
+| `getAdLibMenuItems()` | Monta o menu: cantos oficiais + grupo "My chants" + "Add a chant from GregoBase…" (valor `add-my-chant`) |
+| `refreshAdLibMenus()` | Refaz todos os menus ad libitum (e o molde dos extras) quando a biblioteca muda, mantendo as escolhas |
+| `openAddMyChant(select)` | Ao escolher "Add…": devolve o menu ao canto anterior e abre a janela; cada canto adicionado é selecionado ali |
+| início dos handlers `change` dos ad libitum | Desviam o valor `add-my-chant` para `openAddMyChant` |
+| `getGabcFile(path, part)` | Substitui o `$.get` em `updatePart`: se o ID está na biblioteca (e não é oficial), entrega o GABC guardado; se um ad libitum aponta para um canto que o aparelho não tem, mostra vazio em vez de dar erro |
+| `isOfficialAdLibId(id)` | Se o ID está em `miscChants` |
+| `offerMissingMyChants(hash)` | Chamada em `hashChanged()`: procura IDs da URL (`custom1`…`custom4` e `custom<n>more`) que faltam e chama `MyChants.offerMissing`; depois de instalar, reaplica a URL |
+
+**Carregamento:** `propers.html` inclui `css/my-chants.css` e `js/my-chants.js` (antes de `propers.js`).
+
+### CORS e o plugin nativo
+- Navegadores só deixam uma página ler dados de outro site se esse site enviar o cabeçalho
+  `Access-Control-Allow-Origin`. O GregoBase **não envia** (testado em 2026-11-20).
+- No app, o plugin **`cordova-plugin-advanced-http`** faz a requisição pelo Android, fora do
+  navegador, sem essa restrição. Ele só existe no branch `cantemus-app` (`package.json`).
+- Se um dia o GregoBase liberar o CORS, a versão web passa a baixar sozinha, sem mudar nada.
+
+### Dependências
+GregoBase (`download.php`); `cordova-plugin-advanced-http` (app); `localStorage`; jQuery;
+funções do Benjamin: `populate`, `mapNameToTitle`, `miscChants`, `updatePart`, `hashChanged`,
+`lastHandledHash`, `selCustom`; e, da funcionalidade do botão +, `$adLibTemplate`, `adLibGroups`
+e `syncAdLibExtras`. **My chants depende do botão +** (não funciona sem ele).
+
+### Limitações
+- Os cantos entram **sem a limpeza do latim** do `download-gabc.js` (ela só roda em Node).
+  Aparecem bem, com pequenas diferenças de acentuação.
+- Sem busca dentro do app: o usuário procura no site do GregoBase e cola o link.
+- A biblioteca é **por aparelho**; ainda não há exportar/importar (backup).
+- Só funciona em ad libitum (não nos próprios nem no ordinário).
+- Os textos da interface estão em inglês, como o resto do app.
+
+---
+
+## 6. Funcionalidade: endereço próprio e links do app
+
+### O que faz
+- O botão de compartilhar gera links para **<https://hangueth.github.io/jgabc/propers.html#…>**.
+- No Android com o Cantemus instalado, esses links **abrem direto no app**.
+- Sem o app, abrem o site do Cantemus no navegador (com o botão + e os cantos oficiais do
+  Cantemus; cantos de "My chants" pedem para colar o GABC).
+
+### Como funciona
+1. **GitHub Pages** publica o branch `cantemus` em `hangueth.github.io/jgabc/`. O arquivo
+   vazio `.nojekyll` desliga o processamento Jekyll (mais rápido e evita surpresas).
+2. O repositório **`hangueth.github.io`** publica a raiz do domínio com
+   `.well-known/assetlinks.json`, que diz ao Android: *o app `io.github.hangueth.cantemus`,
+   assinado com a chave de impressão digital X, pode abrir todos os links deste domínio*.
+3. **`config.xml`** (app) declara um `intent-filter` com `android:autoVerify="true"` para
+   `hangueth.github.io/jgabc`. Na instalação, o Android baixa o `assetlinks.json` e confere a
+   chave. Um segundo `intent-filter`, sem verificação, aceita links do `bbloomf.github.io`
+   (eles abrem no Chant Tools se ele estiver instalado).
+4. **`www/js/index.js`** (`handleUrl`) aceita os dois domínios e abre a página certa do app.
+5. **Compartilhar:** `propers.js` (site) e `www/propers.js` (app) usam o novo endereço.
+
+### Dependências
+- A **impressão digital da chave** em `assetlinks.json` precisa ser a da chave que assina o APK.
+  Ele lista duas: a **chave de release** (`BB:1A:08:…:8A:AC`, em
+  `~/.local/opt/cantemus-release/`, usada por `cordova build android --release` através do
+  `build.json`, que fica fora do git) e a **chave de depuração deste computador**
+  (`88:68:23:71:…:D5:FA`, dos APKs de teste). Se entrar outra chave (Play App Signing, por
+  exemplo), acrescente a impressão digital dela.
+- Validar com:
+  `https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://hangueth.github.io&relation=delegate_permission/common.handle_all_urls`
+
+### Limitações
+- O site não tem Google Analytics (a tag herdada do Chant Tools foi removida); continua usando
+  as fontes do Google Fonts.
+- No iOS não há nada disso (não geramos app para iOS).
+
+---
+
+## 7. Funcionalidade: identidade do app (Cantemus)
+
+- **`config.xml`** (branch `cantemus-app`): `id="io.github.hangueth.cantemus"` e
+  `<name>Cantemus</name>`. Por ter outro identificador, o Cantemus **convive** com o Chant Tools
+  no mesmo celular.
+- A **versão** vem do `package.json` (o hook `hooks/sync-config-version.js`, do Benjamin, copia
+  para o `config.xml` no build).
+- **O identificador é permanente** depois de publicado na Play Store.
+
+---
+
+## 8. Mapa de dependências
+
+```mermaid
+flowchart TD
+  GB[(GregoBase)] -->|download-gabc.js no computador| GABC[gabc/*.gabc + miscChants.js]
+  GB -->|cordova-plugin-advanced-http no app| MC[js/my-chants.js<br/>localStorage myChants]
+  GABC --> PJ[propers.js<br/>updatePart / hashChanged]
+  MC -->|getGabcFile, menus, offerMissing| PJ
+  PLUS[Botão +<br/>addAdLibExtra / syncAdLibExtras] --> PJ
+  MC -->|usa $adLibTemplate, syncAdLibExtras| PLUS
+  PJ --> URL[URL com #custom3more=...]
+  URL -->|compartilhar| SITE[hangueth.github.io/jgabc]
+  AL[hangueth.github.io<br/>.well-known/assetlinks.json] -->|verifica| APP[App Cantemus<br/>config.xml + www/js/index.js]
+  SITE -->|links abrem no app| APP
+  KEY[Chave que assina o APK] -->|impressão digital| AL
+```
+
+**Resumo em palavras:**
+- *Cantos adicionados* dependem só do `download-gabc.js` e do GregoBase.
+- *Botão +* depende das funções de partes, URL e PDF do `propers.js` do Benjamin.
+- *My chants* depende do *botão +*, do `propers.js` e, no app, do plugin nativo.
+- *Links próprios* dependem do GitHub Pages, do `assetlinks.json` **e da chave de assinatura**.
+
+---
+
+## 9. Ambiente e comandos
+
+Tudo foi instalado **sem sudo**, só para o usuário, em `~/.local/opt`:
+
+| Ferramenta | Versão | Onde |
+|---|---|---|
+| Node.js | 24.x | `~/.local/opt/node` (atalhos em `~/.local/bin`) |
+| JDK (Temurin) | 17 | `~/.local/opt/jdk17` |
+| Android SDK | plataforma 36, build-tools 36.0.0 | `~/.local/opt/android-sdk` |
+| Gradle | 8.14.2 | `~/.local/opt/gradle` |
+| Cordova CLI | 13 | `~/.local/bin/cordova` |
+| GitHub CLI | 2.105 | `~/.local/bin/gh` (logado como `hangueth`) |
+
+As variáveis do Android ficam em **`~/.local/opt/android-env.sh`** (não mexemos no `~/.bashrc`).
+
+### Ver a versão web localmente
+```bash
+cd "Chat Tools/jgabc"
+python3 -m http.server 8080 --bind 127.0.0.1
+# abrir http://127.0.0.1:8080/propers.html  (Ctrl+Shift+R para recarregar sem cache)
+```
+
+### Adicionar um canto oficial
+```bash
+cd "Chat Tools/jgabc"          # branch cantemus
+# 1. pôr o ID em miscChantIDs (e, se preciso, o nome em miscChantNames) no download-gabc.js
+node download-gabc.js          # baixa tudo e regenera os arquivos
+git status && git diff miscChants.js   # conferir que só mudou o esperado
+git add ... && git commit
+```
+
+### Gerar o APK de teste
+```bash
+cd "Chat Tools/jgabc-cordova"  # branch cantemus-app
+source ~/.local/opt/android-env.sh
+cordova build android --debug
+# APK: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+```
+Se o `config.xml` mudou em algo do Android (intent-filter, id), recrie a plataforma antes:
+`cordova platform rm android && cordova platform add android`.
+
+### Levar as mudanças da web para o app
+```bash
+cd "Chat Tools/jgabc-cordova"
+git -c merge.renameLimit=100000 -c diff.renameLimit=100000 -c merge.directoryRenames=true \
+    merge cantemus
+```
+No branch do app, o site fica em `www/`; essas opções fazem o Git perceber isso. Arquivos de
+ferramentas que o branch `cordova` apagou (`download-gabc.js`, `texts.js` etc.) devem
+**continuar apagados** no conflito (`git rm`).
+
+---
+
+## 10. Como trazer as atualizações do Benjamin
+
+```bash
+cd "Chat Tools/jgabc"
+git fetch upstream
+git switch master && git merge --ff-only upstream/master && git push origin master
+git switch multiple-ad-libitum && git merge master   # (ou rebase, se for virar PR)
+git switch cantemus && git merge master               # resolver conflitos, testar no navegador
+git push origin cantemus                              # atualiza o site
+cd ../jgabc-cordova && git fetch upstream && git merge upstream/cordova   # partes do app
+# depois: merge cantemus (seção 9), build e teste
+```
+
+O Benjamin usa o próprio Claude e muda bastante o `propers.js`. Quanto menos mexermos nele,
+mais fácil esse passo fica. Por isso o My chants vive em arquivo próprio.
+
+---
+
+## 11. Cuidados e armadilhas conhecidas
+
+- **Quebras de linha CRLF.** `propers.js` e `propers.html` usam o formato Windows (CRLF).
+  Editar com ferramentas que reescrevem o arquivo inteiro em LF faz o Git achar que **todas**
+  as linhas mudaram (já aconteceu uma vez). Antes de cada commit: `file propers.js` deve dizer
+  "CRLF line terminators".
+- **`miscChants.js` é gerado.** Editar à mão funciona até a próxima vez que o script rodar.
+- **Chave de assinatura.** O Android só instala uma atualização se ela tiver a **mesma chave**
+  da versão instalada. Distribua sempre APKs de **release**, assinados com
+  `~/.local/opt/cantemus-release/cantemus-release.jks`, e **guarde backup** dele e da `senha.txt`
+  fora deste computador. Perder a chave = não conseguir mais atualizar o app de ninguém.
+- **Site público.** Tudo no branch `cantemus` é publicado em `hangueth.github.io/jgabc`
+  (inclusive este documento). Não coloque nada pessoal no repositório.
+- **`.well-known` e Jekyll.** O GitHub Pages ignora pastas que começam com ponto, a menos que
+  exista o arquivo `.nojekyll`, presente nos dois repositórios.
