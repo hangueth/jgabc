@@ -360,15 +360,17 @@ e `syncAdLibExtras`. **My chants depende do botão +** (não funciona sem ele).
 
 ### Dependências
 - A **impressão digital da chave** em `assetlinks.json` precisa ser a da chave que assina o APK.
-  Hoje é a **chave de depuração deste computador** (`~/.android/debug.keystore`):
-  `88:68:23:71:…:D5:FA`. Trocou a chave (outro computador, chave de release, Play Store)?
-  Atualize o `assetlinks.json` (pode listar várias).
+  Ele lista duas: a **chave de release** (`BB:1A:08:…:8A:AC`, em
+  `~/.local/opt/cantemus-release/`, usada por `cordova build android --release` através do
+  `build.json`, que fica fora do git) e a **chave de depuração deste computador**
+  (`88:68:23:71:…:D5:FA`, dos APKs de teste). Se entrar outra chave (Play App Signing, por
+  exemplo), acrescente a impressão digital dela.
 - Validar com:
   `https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://hangueth.github.io&relation=delegate_permission/common.handle_all_urls`
 
 ### Limitações
-- O site do Cantemus herdou a tag do Google Analytics do Benjamin (as visitas aparecem nas
-  estatísticas dele).
+- O site não tem Google Analytics (a tag herdada do Chant Tools foi removida); continua usando
+  as fontes do Google Fonts.
 - No iOS não há nada disso (não geramos app para iOS).
 
 ---
@@ -487,10 +489,10 @@ mais fácil esse passo fica. Por isso o My chants vive em arquivo próprio.
   as linhas mudaram (já aconteceu uma vez). Antes de cada commit: `file propers.js` deve dizer
   "CRLF line terminators".
 - **`miscChants.js` é gerado.** Editar à mão funciona até a próxima vez que o script rodar.
-- **Chave de assinatura.** A chave de depuração é **deste computador**. APKs gerados em outra
-  máquina não atualizam os já instalados (o Android exige a mesma chave) e quebram a
-  verificação dos links. Para distribuir de verdade, criar uma chave de release e guardar
-  backup.
+- **Chave de assinatura.** O Android só instala uma atualização se ela tiver a **mesma chave**
+  da versão instalada. Distribua sempre APKs de **release**, assinados com
+  `~/.local/opt/cantemus-release/cantemus-release.jks`, e **guarde backup** dele e da `senha.txt`
+  fora deste computador. Perder a chave = não conseguir mais atualizar o app de ninguém.
 - **Site público.** Tudo no branch `cantemus` é publicado em `hangueth.github.io/jgabc`
   (inclusive este documento). Não coloque nada pessoal no repositório.
 - **`.well-known` e Jekyll.** O GitHub Pages ignora pastas que começam com ponto, a menos que
