@@ -33,6 +33,30 @@
         <resource-file src="res/android/values-night-v34/cdv_colors.xml" target="app/src/main/res/values-night-v34/cdv_colors.xml" />
         <resource-file src="res/screen/android/splashscreen-night.xml" target="app/src/main/res/drawable-night/ic_cdv_splashscreen.xml" />
         <config-file parent="/*/application/activity" target="AndroidManifest.xml">
+            <!-- My chants files (.mychants, exported by the app) opened from WhatsApp, Drive, e-mail or the files app.
+                 Apps that receive the file rarely keep its extension or a specific type, so the app offers to open
+                 JSON and generic files; www/js/index.js shows the chants, or says the file isn't a My chants file. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/x-mychants" />
+            </intent-filter>
+            <!-- file managers that give the file's name: any type, but only .mychants -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:host="*" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.mychants" />
+                <data android:pathPattern=".*\\..*\\.mychants" />
+                <data android:pathPattern=".*\\..*\\..*\\.mychants" />
+            </intent-filter>
             <!-- Cantemus's own links, verified by https://hangueth.github.io/.well-known/assetlinks.json -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />

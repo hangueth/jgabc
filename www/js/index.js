@@ -62,7 +62,7 @@ var app = {
                 console.warn(failure);
             });
             window.plugins.webintent.onNewIntent(function(url) {
-                if(url) app.handleUrl(url);
+                if(url) app.handleUrl(url, true);
                 else app.onResume();
             });
         } else {
@@ -70,9 +70,14 @@ var app = {
         }
     },
 
-    handleUrl: function(url) {
+    // isNew: the app was already open and received this url now (not a reload with the same intent)
+    handleUrl: function(url, isNew) {
         if(!url) {
             app.onResume();
+            return;
+        }
+        if(/^(content|file):/i.test(url)) {
+            app.openMyChantsFile(url, isNew);
             return;
         }
         var urlRegex = /\/\/(?:hangueth|bbloomf)\.github\.io\/jgabc\/([^#?]*)([#?].*)?$/i;
@@ -86,6 +91,36 @@ var app = {
         } else {
             if(!location.pathname.match(/\/propers\.html$/)) location = 'propers.html';
         }
+    },
+
+    // A file opened from another app (WhatsApp, Drive, files…), which should be a My chants file (.mychants):
+    // read with cordova-plugin-file, which understands content:// URIs, and shown by MyChants.showImportDialog.
+    openMyChantsFile: function(url, isNew) {
+        // the app's intent stays the same when the page reloads: show each file once
+        try {
+            if(sessionStorage.openedMyChantsFile == url && !isNew) return app.onResume();
+            sessionStorage.openedMyChantsFile = url;
+        } catch(e) {}
+        if(!location.pathname.match(/\/propers\.html$/)) {
+            location = 'propers.html';
+            return;
+        }
+        new Promise(function(resolve, reject) {
+            window.resolveLocalFileSystemURL(url, function(entry) {
+                entry.file(function(file) {
+                    var reader = new FileReader();
+                    reader.onload = function() { resolve(reader.result); };
+                    reader.onerror = function() { reject(new Error('The file could not be read.')); };
+                    reader.readAsText(file);
+                }, reject);
+            }, reject);
+        }).catch(function(error) {
+            return new Error('The file could not be opened (' + (error && (error.message || 'error ' + error.code)) + ').');
+        }).then(function(text) {
+            var show = function() { if(window.MyChants) MyChants.showImportDialog(text); };
+            if(document.readyState == 'loading') document.addEventListener('DOMContentLoaded', show);
+            else show();
+        });
     },
 
     // Update DOM on a Received Event
