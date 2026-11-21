@@ -99,13 +99,16 @@ var MyChants = (function() {
   }
 
   // Export and import: the whole library in one JSON file, with the scores, so that it can be restored or given to
-  // another device (a choir member's phone) without depending on GregoBase.
-  var fileFormat = 'cantemus-my-chants';
+  // another device (a choir member's phone) without depending on GregoBase. The file's extension, .mychants, and its
+  // format name don't name any app, so that any version of Chant Tools can open them; the Android app opens .mychants
+  // files from other apps (WhatsApp, Drive, files) by itself.
+  var fileFormat = 'my-chants',
+      oldFileFormats = ['cantemus-my-chants'];
   function exportText() {
     return JSON.stringify({ format: fileFormat, version: 1, exported: new Date().toISOString(), chants: load() }, null, 1);
   }
   function exportFileName() {
-    return 'cantemus-my-chants-' + new Date().toISOString().slice(0, 10) + '.json';
+    return 'my-chants-' + new Date().toISOString().slice(0, 10) + '.mychants';
   }
   function base64(text) {
     var bytes = new TextEncoder().encode(text), binary = '';
@@ -140,17 +143,17 @@ var MyChants = (function() {
       }
     });
   }
-  // Adds the chants of an exported file to the library; chants already in it (or official ones) are kept as they are.
-  // Returns {added: [names], already: count, invalid: count}.
-  function importText(text, isOfficial) {
+  // The chants of an exported file: {chants: [{id, name, gabc}], invalid: count}; throws if it isn't one.
+  function parseFile(text) {
     var data;
     try {
       data = JSON.parse(text);
     } catch(e) {}
-    if(!data || data.format != fileFormat || !data.chants || typeof(data.chants) != 'object') {
+    if(!data || (data.format != fileFormat && oldFileFormats.indexOf(data.format) < 0) ||
+        !data.chants || typeof(data.chants) != 'object') {
       throw new Error("This isn't a My chants file (exported with “Export My chants”).");
     }
-    var lib = load(), result = { added: [], already: 0, invalid: 0 };
+    var result = { chants: [], invalid: 0 };
     Object.keys(data.chants).forEach(function(id) {
       var chant = data.chants[id], gabc;
       try {
@@ -159,10 +162,18 @@ var MyChants = (function() {
       } catch(e) {
         return result.invalid++;
       }
-      if(lib[id] || (isOfficial && isOfficial(id))) return result.already++;
-      lib[id] = { name: chant.name.trim() || headerValue(gabc, 'name') || 'GregoBase ' + id, gabc: gabc,
-        added: new Date().toISOString() };
-      result.added.push(lib[id].name);
+      result.chants.push({ id: id, name: chant.name.trim() || headerValue(gabc, 'name') || 'GregoBase ' + id, gabc: gabc });
+    });
+    return result;
+  }
+  // Adds the chants of an exported file to the library; chants already in it (or official ones) are kept as they are.
+  // Returns {added: [names], already: count, invalid: count}.
+  function importText(text, isOfficial) {
+    var file = parseFile(text), lib = load(), result = { added: [], already: 0, invalid: file.invalid };
+    file.chants.forEach(function(chant) {
+      if(lib[chant.id] || (isOfficial && isOfficial(chant.id))) return result.already++;
+      lib[chant.id] = { name: chant.name, gabc: chant.gabc, added: new Date().toISOString() };
+      result.added.push(chant.name);
     });
     if(result.added.length) save(lib);
     return result;
@@ -318,6 +329,51 @@ var MyChants = (function() {
     return d;
   }
 
+  // Shows the chants of a My chants file opened from another app and offers to add the new ones.
+  // text is the file's content, or an Error if it couldn't be read.
+  function showImportDialog(text, options) {
+    options = options || {};
+    var d = dialog('Import My chants'),
+        $body = d.$body,
+        file;
+    try {
+      if(text instanceof Error) throw text;
+      file = parseFile(text);
+    } catch(error) {
+      $('<p class="my-chants-error"></p>').text(error.message).appendTo($body);
+      $('<div class="my-chants-buttons"></div>').append($('<button class="btn btn-sm btn-default">Close</button>').click(d.close)).appendTo($body);
+      return d;
+    }
+    var lib = load(),
+        isOfficial = options.isOfficial || function() { return false; },
+        fresh = file.chants.filter(function(chant) { return !lib[chant.id] && !isOfficial(chant.id); });
+    $('<p></p>').text(!file.chants.length? 'This file has no chants.' :
+      !fresh.length? 'All the chants in this file are already in your app:' :
+      'This file has ' + plural(file.chants.length, 'chant', 'chants') + (fresh.length < file.chants.length?
+        '; ' + plural(fresh.length, 'is', 'are') + ' new (the others are already in your app):' : ':')).appendTo($body);
+    var $ul = $('<ul class="my-chants-missing"></ul>').appendTo($body);
+    file.chants.slice().sort(function(a, b) { return a.name.localeCompare(b.name); }).forEach(function(chant) {
+      var $li = $('<li></li>').appendTo($ul);
+      $('<a target="_blank"></a>').attr('href', chantUrl(chant.id)).text(chant.name).appendTo($li);
+      if(fresh.indexOf(chant) < 0) $('<span class="my-chants-item-status"></span>').text(' — already in the app').appendTo($li);
+    });
+    if(file.invalid) $('<p class="my-chants-error"></p>').text(plural(file.invalid, 'chant is', 'chants are') + ' damaged and will be left out.').appendTo($body);
+    var $buttons = $('<div class="my-chants-buttons"></div>').appendTo($body),
+        $status = $('<div class="my-chants-status" aria-live="polite"></div>').appendTo($body);
+    if(fresh.length) {
+      $('<button class="btn btn-sm btn-primary"></button>').text('Add ' + plural(fresh.length, 'chant', 'chants') + ' to My chants')
+        .click(function() {
+          var result = importText(text, isOfficial);
+          status($status, importSummary(result));
+          $(this).remove();
+          $close.text('Close');
+          if(options.onDone) options.onDone(result);
+        }).appendTo($buttons);
+    }
+    var $close = $('<button class="btn btn-sm btn-default"></button>').text(fresh.length? 'Not now' : 'Close').click(d.close).appendTo($buttons);
+    return d;
+  }
+
   // Offers to add the chants of a shared link that aren't on this device; onDone is called once any were added.
   function offerMissing(ids, onDone) {
     var d = dialog('Chants missing from this app'),
@@ -364,6 +420,6 @@ var MyChants = (function() {
   return {
     get: get, list: list, add: add, remove: remove, onChange: onChange,
     parseId: parseId, install: install, showAddDialog: showAddDialog, offerMissing: offerMissing,
-    exportText: exportText, importText: importText
+    exportText: exportText, importText: importText, showImportDialog: showImportDialog
   };
 })();
