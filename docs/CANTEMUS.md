@@ -66,7 +66,7 @@ upstream/cordova ──► cantemus-app             ← o app Android (pasta jga
 ### Pastas no computador
 
 ```
-Chat Tools/
+Cantemus/
 ├── jgabc/            ← checkout principal (branches master, multiple-ad-libitum, cantemus)
 ├── jgabc-cordova/    ← "worktree" do mesmo repositório, no branch cantemus-app (o app)
 ├── Partituras/       ← PDFs e imagens de partituras enviadas para identificar
@@ -428,14 +428,14 @@ As variáveis do Android ficam em **`~/.local/opt/android-env.sh`** (não mexemo
 
 ### Ver a versão web localmente
 ```bash
-cd "Chat Tools/jgabc"
+cd "Cantemus/jgabc"
 python3 -m http.server 8080 --bind 127.0.0.1
 # abrir http://127.0.0.1:8080/propers.html  (Ctrl+Shift+R para recarregar sem cache)
 ```
 
 ### Adicionar um canto oficial
 ```bash
-cd "Chat Tools/jgabc"          # branch cantemus
+cd "Cantemus/jgabc"          # branch cantemus
 # 1. pôr o ID em miscChantIDs (e, se preciso, o nome em miscChantNames) no download-gabc.js
 node download-gabc.js          # baixa tudo e regenera os arquivos
 git status && git diff miscChants.js   # conferir que só mudou o esperado
@@ -444,7 +444,7 @@ git add ... && git commit
 
 ### Gerar o APK de teste
 ```bash
-cd "Chat Tools/jgabc-cordova"  # branch cantemus-app
+cd "Cantemus/jgabc-cordova"  # branch cantemus-app
 source ~/.local/opt/android-env.sh
 cordova build android --debug
 # APK: platforms/android/app/build/outputs/apk/debug/app-debug.apk
@@ -454,7 +454,7 @@ Se o `config.xml` mudou em algo do Android (intent-filter, id), recrie a platafo
 
 ### Levar as mudanças da web para o app
 ```bash
-cd "Chat Tools/jgabc-cordova"
+cd "Cantemus/jgabc-cordova"
 git -c merge.renameLimit=100000 -c diff.renameLimit=100000 -c merge.directoryRenames=true \
     merge cantemus
 ```
@@ -467,7 +467,7 @@ ferramentas que o branch `cordova` apagou (`download-gabc.js`, `texts.js` etc.) 
 ## 10. Como trazer as atualizações do Benjamin
 
 ```bash
-cd "Chat Tools/jgabc"
+cd "Cantemus/jgabc"
 git fetch upstream
 git switch master && git merge --ff-only upstream/master && git push origin master
 git switch multiple-ad-libitum && git merge master   # (ou rebase, se for virar PR)
