@@ -48,8 +48,8 @@ de bordo (`DIARIO-DE-BORDO.md`, na pasta do projeto, fora do repositório).
 ```
 upstream/master ─────────────┬──────────────► (atualizações do Benjamin)
                              │
-                 multiple-ad-libitum           ← só o botão +, pronto para oferecer ao Benjamin
-                             │                    (issue bbloomf/jgabc#126)
+                 multiple-ad-libitum           ← só o botão +; aceito pelo Benjamin (PR #127,
+                             │                    Chant Tools 1.19.0)
                              ▼
                           cantemus             ← versão web do Cantemus: tudo o que é nosso
                              │                    (publicada em hangueth.github.io/jgabc)
@@ -58,8 +58,9 @@ upstream/cordova ──► cantemus-app             ← o app Android (pasta jga
 ```
 
 - **`master`**: cópia do original, sem mudanças nossas.
-- **`multiple-ad-libitum`**: só a funcionalidade do botão **+**. Fica separada para poder virar
-  um *pull request* para o Benjamin sem levar junto o resto.
+- **`multiple-ad-libitum`**: só a funcionalidade do botão **+**. Ficou separada para virar um
+  *pull request* sem levar o resto; o Benjamin a incorporou (PR #127) e ela já está no
+  `upstream/master`, então este branch não precisa mais de manutenção.
 - **`cantemus`**: a versão web completa do Cantemus (cantos, botão +, My chants, links próprios).
 - **`cantemus-app`**: o app. Nasce do branch `cordova` do Benjamin e recebe o `cantemus` por merge.
 
@@ -187,8 +188,11 @@ GregoBase no ar; Node.js; `npm install` feito na pasta `jgabc`.
 
 ## 4. Funcionalidade: vários cantos por ad libitum (botão +)
 
-**Branch:** `multiple-ad-libitum` (e incluída em `cantemus`). **Status:** oferecida ao Benjamin
-na issue <https://github.com/bbloomf/jgabc/issues/126>, aguardando resposta.
+**Branch:** `multiple-ad-libitum` (e incluída em `cantemus`). **Status:** **aceita.** Oferecida
+na issue <https://github.com/bbloomf/jgabc/issues/126>; o Benjamin abriu o PR
+<https://github.com/bbloomf/jgabc/pull/127> com os nossos dois commits (autoria `hangueth`),
+juntou em 2026-11-21 e lançou no **Chant Tools 1.19.0**. Agora é código do Benjamin: mudanças
+nele devem ser propostas a ele.
 
 ### O que faz
 - Cada um dos 4 ad libitum ganha um botão **+**. Cada clique acrescenta mais um canto logo
