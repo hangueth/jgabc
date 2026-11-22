@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The phone's own certificate authorities, plus Let's Encrypt's roots (ISRG Root X1 and X2, which expire in 2035 and
+     2040), which Android 7.0 doesn't have: without them, downloads from GregoBase (a Let's Encrypt certificate) fail
+     there with "Trust anchor for certification path not found". Used by cordova-plugin-advanced-http in its "legacy"
+     trust mode, which js/my-chants.js sets. -->
+<network-security-config>
+    <base-config>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="@raw/isrg_root_x1" />
+            <certificates src="@raw/isrg_root_x2" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -32,6 +32,13 @@
         <resource-file src="res/android/values-night/cdv_colors.xml" target="app/src/main/res/values-night/cdv_colors.xml" />
         <resource-file src="res/android/values-night-v34/cdv_colors.xml" target="app/src/main/res/values-night-v34/cdv_colors.xml" />
         <resource-file src="res/screen/android/splashscreen-night.xml" target="app/src/main/res/drawable-night/ic_cdv_splashscreen.xml" />
+        <!-- Let's Encrypt's root certificates for Android 7.0 (see res/android/xml/network_security_config.xml) -->
+        <resource-file src="res/android/xml/network_security_config.xml" target="app/src/main/res/xml/network_security_config.xml" />
+        <resource-file src="res/android/raw/isrg_root_x1.pem" target="app/src/main/res/raw/isrg_root_x1.pem" />
+        <resource-file src="res/android/raw/isrg_root_x2.pem" target="app/src/main/res/raw/isrg_root_x2.pem" />
+        <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
+            <application android:networkSecurityConfig="@xml/network_security_config" />
+        </edit-config>
         <config-file parent="/*/application/activity" target="AndroidManifest.xml">
             <!-- My chants files (.mychants, exported by the app) opened from WhatsApp, Drive, e-mail or the files app.
                  Apps that receive the file rarely keep its extension or a specific type, so the app offers to open
