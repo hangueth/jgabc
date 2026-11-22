@@ -69,14 +69,27 @@ var MyChants = (function() {
     }
     return gabc.replace(/\r\n?/g, '\n');
   }
+  // In the app, the plugin's "legacy" trust mode checks GregoBase's certificate with the app's network security config,
+  // which adds Let's Encrypt's root certificates for Android 7.0 (its default mode reads only the phone's own ones).
+  var trustModeSet = null;
+  function setTrustMode(http) {
+    return trustModeSet = trustModeSet || new Promise(function(resolve) {
+      http.setServerTrustMode('legacy', resolve, resolve);
+    });
+  }
   function download(id) {
     var url = gregobase + 'download.php?format=gabc&elem=1&id=' + id,
         http = window.cordova && cordova.plugin && cordova.plugin.http;
-    return new Promise(function(resolve, reject) {
+    return (http? setTrustMode(http) : Promise.resolve()).then(function() { return new Promise(function(resolve, reject) {
       if(http) {
         http.sendRequest(url, { method: 'get', responseType: 'text' },
           function(response) { resolve(response.data); },
-          function(response) { reject(new Error(response.status > 0? 'GregoBase answered ' + response.status + '.' : (response.error || 'No connection.'))); });
+          function(response) {
+            // -2: the secure connection failed (an unknown certificate, or the device's date and time are wrong)
+            reject(new Error(response.status > 0? 'GregoBase answered ' + response.status + '.' :
+              response.status == -2? "Couldn't connect securely to GregoBase. Check that this device's date and time are right. (" + response.error + ')' :
+              (response.error || 'No connection.')));
+          });
       } else {
         fetch(url).then(function(response) {
           if(!response.ok) throw new Error('GregoBase answered ' + response.status + '.');
@@ -87,7 +100,7 @@ var MyChants = (function() {
           reject(error);
         });
       }
-    }).then(checkGabc);
+    }); }).then(checkGabc);
   }
   // downloads chant id and adds it to the library; resolves with its name
   function install(id, name) {
