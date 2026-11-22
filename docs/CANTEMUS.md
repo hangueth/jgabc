@@ -610,9 +610,10 @@ mede a nota destacada e o volume que sai (AnalyserNode) em cada nota.
   (`tones.js`, `psalmtone.js`, `exsurge.min.js` usam JavaScript mais novo). Aparelhos com Android
   7 só funcionam com o WebView atualizado pela Play Store.
 
-**Contribuição possível ao Benjamin:** copiar o `js/Tone.min.js` do `master` para
-`www/js/Tone.min.js` no branch `cordova` (e, se ele quiser, o fallback). Antes, confirmar com o
-coral que o som melhorou.
+**Contribuição possível ao Benjamin:** branch **`app-tonejs-15`** (a partir do
+`upstream/cordova`, 2 commits: 1. o Tone.js 15 em `www/js/`; 2. o fallback, opcional).
+Comparação: `bbloomf/jgabc/compare/cordova...hangueth:jgabc:app-tonejs-15`. Antes de propor,
+confirmar com o coral que o som melhorou.
 
 ---
 
