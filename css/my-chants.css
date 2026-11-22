@@ -68,6 +68,12 @@
 html.dark .my-chants-hint-inline {
   color: #aaa;
 }
+.my-chants-id {
+  color: #777;
+}
+html.dark .my-chants-id {
+  color: #999;
+}
 .my-chants-list li {
   margin: 4px 0;
 }

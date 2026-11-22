@@ -222,6 +222,12 @@ var MyChants = (function() {
     return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
+  // a chant in the dialogs' lists: its name, linking to its GregoBase page, followed by its GregoBase ID, e.g. "Media vita (3973)"
+  function chantLink(chant) {
+    return $('<span></span>')
+      .append($('<a target="_blank"></a>').attr('href', chantUrl(chant.id)).text(chant.name))
+      .append($('<span class="my-chants-id"></span>').text(' (' + chant.id + ')'));
+  }
   // a simple dialog: returns {$overlay, $body, close}
   function dialog(title) {
     var $overlay = $('<div class="my-chants-overlay"></div>'),
@@ -356,7 +362,7 @@ var MyChants = (function() {
       var $ul = $('<ul></ul>').appendTo($list);
       chants.forEach(function(chant) {
         var $li = $('<li></li>').appendTo($ul);
-        $('<a target="_blank"></a>').attr('href', chantUrl(chant.id)).text(chant.name).appendTo($li);
+        chantLink(chant).appendTo($li);
         $('<button class="btn btn-xs btn-default" title="Remove from My chants"><span class="glyphicon glyphicon-trash"></span></button>')
           .click(function() {
             if(!confirm('Remove “' + chant.name + '” from My chants?')) return;
@@ -395,7 +401,7 @@ var MyChants = (function() {
     var $ul = $('<ul class="my-chants-missing"></ul>').appendTo($body);
     file.chants.slice().sort(function(a, b) { return a.name.localeCompare(b.name); }).forEach(function(chant) {
       var $li = $('<li></li>').appendTo($ul);
-      $('<a target="_blank"></a>').attr('href', chantUrl(chant.id)).text(chant.name).appendTo($li);
+      chantLink(chant).appendTo($li);
       if(fresh.indexOf(chant) < 0) $('<span class="my-chants-item-status"></span>').text(' — already in the app').appendTo($li);
     });
     if(file.invalid) $('<p class="my-chants-error"></p>').text(plural(file.invalid, 'chant is', 'chants are') + ' damaged and will be left out.').appendTo($body);
