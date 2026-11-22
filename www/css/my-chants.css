@@ -85,7 +85,34 @@ html.dark .my-chants-hint-inline {
   border-top: 1px solid #ddd;
   color: #666;
 }
+/* the (i) button and the GregoBase explanation it opens */
+.my-chants-info {
+  padding: 0 2px;
+  font-size: 16px;
+  vertical-align: baseline;
+}
+.my-chants-help {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  background: #f3f6fa;
+  border: 1px solid #d5dde8;
+}
+.my-chants-help p,
+.my-chants-help ol {
+  margin: 0 0 6px;
+}
+.my-chants-help ol {
+  padding-left: 20px;
+}
+.my-chants-help li {
+  margin: 3px 0;
+}
 @media screen {
+  html.dark .my-chants-help {
+    background: #24282e;
+    border-color: #3a414b;
+  }
   html.dark .my-chants-dialog {
     background: #1a1a1a;
     color: #eee;

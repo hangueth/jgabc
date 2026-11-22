@@ -3607,8 +3607,8 @@ $(function(){
       while(i < items.length && items[i].name.localeCompare(chant.name) <= 0) ++i;
       items.splice(i, 0, {name: chant.name + ' *', id: chant.id});
     });
-    return [{name:"Select ad lib. chant", id: ""}].concat(items,
-      [{name: 'Add a chant from GregoBase…', id: addMyChantValue}]).map(mapNameToTitle);
+    return [{name:"Select ad lib. chant", id: ""},
+      {name: '+ Add a chant from GregoBase…', id: addMyChantValue}].concat(items).map(mapNameToTitle);
   };
   populate(getAdLibMenuItems(), $('#selCustom'));
   var $customTemplate = $('#divCustom');

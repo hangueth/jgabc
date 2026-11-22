@@ -241,8 +241,25 @@ var MyChants = (function() {
     var d = dialog('Add a chant from GregoBase'),
         $body = d.$body,
         isOfficial = options.isOfficial || function() { return false; };
-    $('<p></p>').html('Paste the link or the ID of the chant on <a target="_blank" href="' + gregobase + '">GregoBase</a>, ' +
-      'e.g. <i>' + gregobase + 'chant.php?id=3973</i>').appendTo($body);
+    var $intro = $('<p></p>').html('Paste the link or the ID of the chant on <a target="_blank" href="' + gregobase + '">GregoBase</a>, ' +
+      'e.g. <i>' + gregobase + 'chant.php?id=3973</i> ').appendTo($body),
+        $help = $('<div class="my-chants-help"></div>').html(
+          '<p><b>What is GregoBase?</b> A free website, with no login, that holds a huge index of Gregorian chants ' +
+          '(antiphons, hymns, sequences, Mass chants…), transcribed by volunteers. Chant Tools takes its chants from there, ' +
+          'so any chant on GregoBase can be brought into this app.</p>' +
+          '<p><b>How to bring a chant:</b></p>' +
+          '<ol>' +
+          '<li>Open <a target="_blank" href="' + gregobase + '">GregoBase</a> and look for the chant by its first words ' +
+          '(the search box, or the lists by type or by book).</li>' +
+          '<li>Open the chant. The address of its page looks like <i>' + gregobase + 'chant.php?id=3973</i>; ' +
+          'the number at the end is its ID.</li>' +
+          '<li>Copy that address (or just the number), paste it in the field below and tap <b>Add</b>.</li>' +
+          '</ol>' +
+          '<p>The chant is then kept on this device and appears in every ad libitum menu, marked with *.</p>'
+        ).hide().appendTo($body);
+    $('<button type="button" class="btn btn-xs btn-link my-chants-info" title="What is GregoBase, and how to find a chant">' +
+      '<span class="glyphicon glyphicon-info-sign"></span></button>')
+      .click(function(e) { e.preventDefault(); $help.toggle(); }).appendTo($intro);
     var $form = $('<form class="my-chants-form"></form>').appendTo($body),
         $input = $('<input type="text" class="form-control" placeholder="GregoBase link or ID" autocomplete="off">').val(options.id || '').appendTo($form),
         $name = $('<input type="text" class="form-control" placeholder="Name in the menu (optional)" autocomplete="off">').appendTo($form),
