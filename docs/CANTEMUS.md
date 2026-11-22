@@ -261,8 +261,11 @@ abrir um link ─► hashChanged() ─► syncAdLibExtras(hash) ─► recria os
 **Branch:** `cantemus` (não oferecida ao Benjamin ainda).
 
 ### O que faz
-- A última opção de cada menu ad libitum é **"Add a chant from GregoBase…"**. Ela abre uma
-  janela em que se cola o **link ou o ID** do GregoBase (e, opcionalmente, um nome para o menu).
+- A segunda opção de cada menu ad libitum (logo abaixo de "Select ad lib. chant") é
+  **"+ Add a chant from GregoBase…"**, no topo para ser vista. Ela abre uma janela em que se
+  cola o **link ou o ID** do GregoBase (e, opcionalmente, um nome para o menu). O botão **(i)**
+  ao lado do texto abre uma explicação: o que é o GregoBase (site gratuito, sem login) e como
+  achar um canto e pegar o link ou o ID.
 - No **app**, o canto é baixado e guardado **no aparelho**; aparece em todos os menus **no meio
   dos cantos oficiais, em ordem alfabética, com um `*` no fim do nome** (ex.: *Ave verum (teste) \**),
   e já fica selecionado. O `*` só aparece no menu; o nome guardado não muda. (Até 2026-11-21
@@ -325,7 +328,7 @@ código), mas some se o app for desinstalado ou os dados do site forem apagados.
 
 | Onde | O quê |
 |---|---|
-| `getAdLibMenuItems()` | Monta o menu: cantos oficiais com os da biblioteca encaixados em ordem alfabética (`localeCompare`, cada um antes do primeiro oficial que vem depois dele, para não mexer na ordem do Benjamin), com ` *` no nome; no fim, "Add a chant from GregoBase…" (valor `add-my-chant`) |
+| `getAdLibMenuItems()` | Monta o menu: cantos oficiais com os da biblioteca encaixados em ordem alfabética (`localeCompare`, cada um antes do primeiro oficial que vem depois dele, para não mexer na ordem do Benjamin), com ` *` no nome; no topo, "+ Add a chant from GregoBase…" (valor `add-my-chant`) |
 | `refreshAdLibMenus()` | Refaz todos os menus ad libitum (e o molde dos extras) quando a biblioteca muda, mantendo as escolhas |
 | `openAddMyChant(select)` | Ao escolher "Add…": devolve o menu ao canto anterior e abre a janela; cada canto adicionado é selecionado ali |
 | início dos handlers `change` dos ad libitum | Desviam o valor `add-my-chant` para `openAddMyChant` |
