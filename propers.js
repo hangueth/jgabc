@@ -462,6 +462,14 @@ $(function(){
     var abregesPath = 'gabc/chants-abreges/' + abregesFile;
     return sel[part].style == 'chants-abreges-verse'? [fullPath, abregesPath] : [abregesPath];
   };
+  // the gabc of a chant's file in gabc/, or of the chant in My chants (js/my-chants.js), unless the app has it as an ad libitum chant
+  var getGabcFile = function(path, part) {
+    var match = /^gabc\/(\d+)\.gabc$/.exec(path),
+        myChant = match && MyChants.get(match[1]);
+    if(myChant && !isOfficialAdLibId(match[1])) return Promise.resolve(myChant.gabc);
+    // an ad libitum chant of a shared link may not be on this device yet (see offerMissingMyChants): show none until it's added
+    return isCustomPart(part)? Promise.resolve($.get(path)).catch(function() { return ''; }) : $.get(path);
+  };
   // true if the loaded gabc is not the version (full, Chants Abrégés, or both spliced together) that the selected style needs
   var needsGabcReload = function(part) {
     return !!sel[part].gabcPaths && sel[part].gabcPaths != getGabcPathsForPart(part).join(' ');
@@ -900,7 +908,7 @@ $(function(){
               gabcPathsKey = sel[part].gabcPaths = gabcPaths.join(' ');
           Promise.all(gabcPaths.map(function(path, i) {
             // the offertory verses are optional: if they fail to load, the antiphon is still shown without them
-            return i && part == 'offertorium'? Promise.resolve($.get(path)).catch(function() { return null; }) : $.get(path);
+            return i && part == 'offertorium'? Promise.resolve($.get(path)).catch(function() { return null; }) : getGabcFile(path, part);
           })).then(function(gabcs) {
             // ignore these responses if another version of the chant has been requested since
             if(gabcPathsKey != sel[part].gabcPaths) return;
@@ -3588,7 +3596,21 @@ $(function(){
       children: e.children && e.children.map(mapNameToTitle)
     }
   };
-  populate([{name:"Select ad lib. chant", id: ""}].concat(miscChants).map(mapNameToTitle), $('#selCustom'));
+  // the ad libitum menu: the app's chants with the user's own (My chants, in js/my-chants.js) among them in alphabetical
+  // order, marked with *, then the option to add one
+  var addMyChantValue = 'add-my-chant';
+  var getAdLibMenuItems = function() {
+    var items = miscChants.slice();
+    // each chant goes before the first one that comes after it, so the app's chants keep their order
+    MyChants.list().forEach(function(chant) {
+      var i = 0;
+      while(i < items.length && items[i].name.localeCompare(chant.name) <= 0) ++i;
+      items.splice(i, 0, {name: chant.name + ' *', id: chant.id});
+    });
+    return [{name:"Select ad lib. chant", id: ""},
+      {name: '+ Add a chant from GregoBase…', id: addMyChantValue}].concat(items).map(mapNameToTitle);
+  };
+  populate(getAdLibMenuItems(), $('#selCustom'));
   var $customTemplate = $('#divCustom');
   $.each(['','offertorium','communio','ite'], function(i,key) {
     var $custom = $customTemplate;
@@ -3627,6 +3649,7 @@ $(function(){
     updatePart(part, this.options[this.selectedIndex].innerText);
   })
   $('[part^=custom] select').change(function(){
+    if(this.value == addMyChantValue) return openAddMyChant(this);
     var capPart = this.id.match(/[A-Z][a-z]+\d*$/)[0],
         part = capPart.toLowerCase();
     selCustom[part + 'ID'] = this.value;
@@ -3710,7 +3733,57 @@ $(function(){
       });
     });
   }
+  // My chants (js/my-chants.js): chants from GregoBase that the user adds to the ad libitum menus, kept on this device
+  var isOfficialAdLibId = function(id) {
+    var found = false;
+    (function search(chants) {
+      chants.forEach(function(chant) {
+        if(chant.children) search(chant.children);
+        else if(String(chant.id) == String(id)) found = true;
+      });
+    })(miscChants);
+    return found;
+  };
+  function refreshAdLibMenus() {
+    $('[id^=selCustom]').add($adLibTemplate.find('select')).each(function() {
+      var $select = $(this),
+          value = $select.val();
+      $select.empty();
+      populate(getAdLibMenuItems(), $select);
+      $select.val(value || '');
+    });
+  }
+  MyChants.onChange(refreshAdLibMenus);
+  // "Add a chant from GregoBase…" in an ad libitum menu: puts back the chant that was selected, and selects each chant added
+  function openAddMyChant(select) {
+    var part = $(select).parents('[part]').attr('part');
+    $(select).val(selCustom[part + 'ID'] || '');
+    MyChants.showAddDialog({
+      isOfficial: isOfficialAdLibId,
+      onAdded: function(id) { $(select).val(id).change(); }
+    });
+  }
+  // offers to add the ad libitum chants of the URL that are neither the app's nor in My chants, once per chant per page load
+  var offeredMissingMyChants = {};
+  function offerMissingMyChants(hash) {
+    var ids = [];
+    adLibGroups.forEach(function(group) {
+      var more = hash['custom' + group + 'more'];
+      [hash['custom' + group]].concat(typeof(more) == 'string'? more.split(',') : []).forEach(function(id) {
+        id = typeof(id) == 'string'? id : '';
+        if(/^\d+$/.test(id) && ids.indexOf(id) < 0 && !offeredMissingMyChants[id] && !isOfficialAdLibId(id) && !MyChants.get(id)) ids.push(id);
+      });
+    });
+    if(!ids.length) return;
+    ids.forEach(function(id) { offeredMissingMyChants[id] = true; });
+    MyChants.offerMissing(ids, function() {
+      // select the chants that were added, as the URL says
+      lastHandledHash = '';
+      hashChanged();
+    });
+  }
   $(document).on('change', '[ad-lib-group] select', function() {
+    if(this.value == addMyChantValue) return openAddMyChant(this);
     var part = $(this).parents('[part]').attr('part');
     selCustom[part + 'ID'] = this.value;
     $('div[part=' + part + ']').removeClass('modified');
@@ -4465,6 +4538,7 @@ console.info(JSON.stringify(selPropers));
         }
       });
       syncAdLibExtras(hash);
+      offerMissingMyChants(hash);
       // Day/season changes refresh the controls before the URL's custom chant is selected.
       // Restore its verse settings afterwards so an empty or previous offertory cannot clamp them.
       var oldOffertoryVerseCount = sel.offertorium.verseCount || 0,

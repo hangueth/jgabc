@@ -1,0 +1,136 @@
+/* dialogs of js/my-chants.js */
+.my-chants-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px 16px;
+  overflow-y: auto;
+}
+.my-chants-dialog {
+  background: #fff;
+  color: #333;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  width: 100%;
+  max-width: 560px;
+  font-size: 14px;
+}
+.my-chants-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #ddd;
+}
+.my-chants-head h4 {
+  margin: 0;
+}
+.my-chants-body {
+  padding: 12px 14px 14px;
+}
+.my-chants-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.my-chants-form input {
+  flex: 1 1 220px;
+}
+.my-chants-status {
+  min-height: 20px;
+  margin: 8px 0;
+}
+.my-chants-error,
+.my-chants-item-status.my-chants-error {
+  color: #c00;
+}
+.my-chants-paste textarea {
+  margin-bottom: 8px;
+  font-family: monospace;
+  font-size: 12px;
+}
+.my-chants-list h5 {
+  margin: 16px 0 6px;
+  font-weight: bold;
+}
+.my-chants-list ul,
+.my-chants-missing {
+  padding-left: 18px;
+}
+.my-chants-hint-inline {
+  margin: 0 0 4px;
+  color: #666;
+}
+html.dark .my-chants-hint-inline {
+  color: #aaa;
+}
+.my-chants-list li {
+  margin: 4px 0;
+}
+.my-chants-list li .btn {
+  margin-left: 8px;
+}
+.my-chants-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.my-chants-hint {
+  margin: 16px 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid #ddd;
+  color: #666;
+}
+/* the (i) button and the GregoBase explanation it opens */
+.my-chants-info {
+  padding: 0 2px;
+  font-size: 16px;
+  vertical-align: baseline;
+}
+.my-chants-help {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  background: #f3f6fa;
+  border: 1px solid #d5dde8;
+}
+.my-chants-help p,
+.my-chants-help ol {
+  margin: 0 0 6px;
+}
+.my-chants-help ol {
+  padding-left: 20px;
+}
+.my-chants-help li {
+  margin: 3px 0;
+}
+@media screen {
+  html.dark .my-chants-help {
+    background: #24282e;
+    border-color: #3a414b;
+  }
+  html.dark .my-chants-dialog {
+    background: #1a1a1a;
+    color: #eee;
+  }
+  html.dark .my-chants-hint {
+    border-top-color: #444;
+    color: #aaa;
+  }
+  html.dark .my-chants-head {
+    border-bottom-color: #444;
+  }
+  html.dark .my-chants-dialog .form-control {
+    background: #000;
+    color: #fff;
+    border-color: #555;
+  }
+  html.dark .my-chants-error,
+  html.dark .my-chants-item-status.my-chants-error {
+    color: #f66;
+  }
+}
