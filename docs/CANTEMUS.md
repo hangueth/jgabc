@@ -443,6 +443,20 @@ e `syncAdLibExtras`. **My chants depende do botão +** (não funciona sem ele).
 - A **versão** vem do `package.json` (o hook `hooks/sync-config-version.js`, do Benjamin, copia
   para o `config.xml` no build).
 - **O identificador é permanente** depois de publicado na Play Store.
+- **Ícone** (desenhado pelo usuário em 2026-11-22; original em `res/icon-source.png`, 1254 px,
+  no branch `cantemus-app`). Gerado com Python/Pillow a partir do original:
+  - `res/mipmap-*/icon.png`: o ícone inteiro, com a moldura dourada (Android 7 e lançadores
+    antigos usam este).
+  - `res/mipmap-*/icon-background.png` + `icon-foreground.png` (transparente): o **ícone
+    adaptativo** do Android 8+. O lançador corta em círculo ou "squircle", então a moldura
+    não cabe: o fundo é o couro e a pauta ocupa ~60% da largura, dentro da zona segura.
+  - `res/android/playstore-icon.png`: 512 px, o ícone inteiro.
+  - `res/screen/android/splash-icon.png`: **tela de abertura** (Android 12+), o ícone com os
+    cantos transparentes, dentro do círculo de 192 dp. O mesmo nos modos claro e escuro.
+    Antes aparecia o robô do Cordova: o `splashscreen.xml` herdado nunca existiu, nem no Benjamin.
+  - Os arquivos de `res/` são ignorados pelo `.gitignore` do Benjamin: entram com `git add -f`.
+- **Release no GitHub:** tag `cantemus-v<versão>` (as tags sem prefixo, como `1.9.32`, são do
+  Benjamin), título "Cantemus <versão>", com o APK de release assinado anexado.
 
 ---
 
