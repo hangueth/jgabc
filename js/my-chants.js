@@ -64,7 +64,6 @@ var MyChants = (function() {
         match = new RegExp('(?:^|\\n)\\s*' + key + '\\s*:\\s*([^;\\n]*)').exec(header);
     return match? match[1].trim() : '';
   }
-  // throws unless the text looks like a GABC score with a header
   // GregoBase sometimes writes the * (and the dagger and cross) as Gregorio's LaTeX symbols in <v>…</v>, e.g.
   // <v>\gresixstar</v>; exsurge draws them with a glyph that the lyrics font doesn't have (an empty box), so
   // they're turned into the plain characters, which Chant Tools' own chants use.
@@ -73,6 +72,7 @@ var MyChants = (function() {
     return typeof(gabc) == 'string'? gabc.replace(/<v>\s*\\(gresixstar|grestar|greheightstar|gredagger|grecross|grealtcross)\s*(?:\{\})?\s*<\/v>/g,
       function(match, name) { return gabcSymbols[name]; }) : gabc;
   }
+  // throws unless the text looks like a GABC score with a header; returns it with \n line ends and fixGabc applied
   function checkGabc(gabc) {
     if(typeof(gabc) != 'string' || gabc.indexOf('%%') < 0 || !/\([^)]*\)/.test(gabc.slice(gabc.indexOf('%%')))) {
       throw new Error(/^\s*wrong id\s*$/i.test(gabc || '')? 'GregoBase has no chant with this ID.' : "This isn't a GABC score.");
