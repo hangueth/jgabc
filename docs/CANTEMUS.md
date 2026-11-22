@@ -579,6 +579,43 @@ mais fácil esse passo fica. Por isso o My chants vive em arquivo próprio.
 
 ---
 
+## 10b. Áudio: o som que para (investigação de 2026-11-22)
+
+**Queixa:** avaliações da Play Store (2019–2025) e a issue bbloomf/jgabc#91 dizem que o som
+"para no meio" ou "fica mudo"; em ago/2025 parou de vez para muitos (#92).
+
+**Como o som funciona:** `util.js` (`playScore`, `playNextNote`) toca nota por nota com um
+`Tone.Synth` da biblioteca **Tone.js** (`js/Tone.min.js`), agendando cada nota no
+`Tone.Transport`; `js/tones.js` (com o `unmute.js` embutido) toca a nota avulsa e cuida de
+retomar o AudioContext. Em ago/2025 o Benjamin trocou o Tone.js r12 (2018) pelo **15.1.22** e
+reescreveu `util.js`/`tones.js` para ele (#92, resolvido no **site**).
+
+**Achado:** no **app** (branch `cordova` do Benjamin, logo também o Chant Tools da Play Store) o
+`www/js/Tone.min.js` continuou o **r12**: o código de 2025 rodando sobre a biblioteca de 2018. A
+atualização nunca chegou ao `www/` (os merges do `master` não levam esse arquivo).
+
+**O que fizemos:**
+- `cantemus-app`: `www/js/Tone.min.js` = o 15.1.22 do site.
+- `cantemus` (site, vale também para o app): `js/Tone-r12.min.js` (o antigo) e, nas 4 páginas que
+  tocam som (`propers`, `readings`, `psalmtone`, `transcriber`), uma linha logo depois do Tone.js:
+  se ele não carregou (navegador interno antigo, entre ~Chrome 58 e ~71), carrega o r12.
+
+**Testes** (scripts no scratchpad: `play-test.mjs`, `app-play-test.mjs`, `fallback-test.mjs`):
+mede a nota destacada e o volume que sai (AnalyserNode) em cada nota.
+- Firefox (site) e emulador Android 15 (app), com r12 e com 15.1.22, inclusive com o processador
+  8× mais lento: os 6 cantos de Pentecostes tocam até o fim, sem nenhuma nota muda.
+- Tone.js 15 forçado a falhar → a página usa o r12 e toca normalmente.
+- **Não foi possível reproduzir o corte de som**: falta confirmar em celulares reais.
+- O emulador `android7` (WebView 52 original) não serve: lá o app inteiro já não carrega
+  (`tones.js`, `psalmtone.js`, `exsurge.min.js` usam JavaScript mais novo). Aparelhos com Android
+  7 só funcionam com o WebView atualizado pela Play Store.
+
+**Contribuição possível ao Benjamin:** copiar o `js/Tone.min.js` do `master` para
+`www/js/Tone.min.js` no branch `cordova` (e, se ele quiser, o fallback). Antes, confirmar com o
+coral que o som melhorou.
+
+---
+
 ## 11. Cuidados e armadilhas conhecidas
 
 - **Quebras de linha CRLF.** `propers.js` e `propers.html` usam o formato Windows (CRLF).
