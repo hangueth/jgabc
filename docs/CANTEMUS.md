@@ -342,6 +342,22 @@ código), mas some se o app for desinstalado ou os dados do site forem apagados.
   navegador, sem essa restrição. Ele só existe no branch `cantemus-app` (`package.json`).
 - Se um dia o GregoBase liberar o CORS, a versão web passa a baixar sozinha, sem mudar nada.
 
+### Android 7.0 e o certificado do GregoBase
+- O GregoBase usa certificado da **Let's Encrypt**, cuja raiz (**ISRG Root X1**) só entrou no
+  Android 7.1.1. No **Android 7.0** (o mínimo do app; é o caso do tablet do usuário), adicionar
+  um canto falhava com *"Trust anchor for certification path not found"*.
+- Correção (só `cantemus-app`): `res/android/xml/network_security_config.xml` acrescenta
+  `res/android/raw/isrg_root_x1.pem` e `isrg_root_x2.pem` (copiados do pacote de certificados
+  do Fedora; SHA-256 `96:BC:EC:06:…:08:C6` e `69:72:9B:8E:…:14:70`, válidos até 2035 e 2040)
+  aos certificados do próprio aparelho; o `config.xml` liga isso com `resource-file` e
+  `edit-config` (`android:networkSecurityConfig`). A pasta `res/` está no `.gitignore` do
+  Benjamin: arquivos novos ali entram com `git add -f`.
+- O plugin `cordova-plugin-advanced-http` só respeita essa configuração no modo **`legacy`**
+  (o modo padrão lê direto o repositório de certificados do aparelho); o `js/my-chants.js`
+  chama `setServerTrustMode('legacy')` antes do primeiro download.
+- Testado num emulador Android 7.0 (`android7`): sem a correção, o erro do tablet; com ela, o
+  canto baixa.
+
 ### Exportar no app: o plugin de compartilhar
 - A WebView do app **ignora downloads**, por isso a exportação usa o
   **`cordova-plugin-x-socialsharing`** (6.0.4, só no branch `cantemus-app`): o arquivo vai como
@@ -484,6 +500,9 @@ adb exec-out screencap -p > tela.png        # foto da tela;  adb shell input tap
 # para rodar JS na WebView (só APK de depuração): encaminhar o DevTools e usar puppeteer.connect
 adb forward tcp:9222 localabstract:webview_devtools_remote_$(adb shell pidof io.github.hangueth.cantemus)
 ```
+Há também o **`android7`** (Android 7.0, WebView 52), para testar aparelhos antigos. A WebView
+dele não aceita `puppeteer.connect`: use o protocolo do DevTools direto (`/json/list` +
+WebSocket, `Runtime.evaluate`), e sem `awaitPromise` (guarde o resultado numa variável global).
 Com `-gpu swiftshader_indirect` o emulador travou (falha de segmentação); `-gpu guest` funciona.
 O APK de release não instala por cima do de depuração (chaves diferentes): desinstale antes.
 
