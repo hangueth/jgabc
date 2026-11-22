@@ -142,10 +142,16 @@ Script **Node.js** (roda no computador, não no app) que:
 
 ## 3. Funcionalidade: cantos ad libitum adicionados
 
-### O que faz
-Acrescenta cantos à lista ad libitum oficial (o mesmo menu dos que já existiam).
+> **Removidos em 2026-11-22.** Com o My chants (seção 5), o usuário passou a adicionar esses
+> cantos pelo próprio app, e o Cantemus voltou a ter exatamente a lista oficial do Benjamin
+> (os 3 commits foram revertidos; `miscChantNames` também saiu). Links antigos com esses IDs
+> oferecem "Add to My chants". A seção fica como registro e como receita, caso um dia seja
+> preciso acrescentar um canto oficial.
 
-### Cantos adicionados
+### O que fazia
+Acrescentava cantos à lista ad libitum oficial (o mesmo menu dos que já existiam).
+
+### Cantos que foram adicionados (hoje: adicionar pelo My chants, com estes IDs)
 
 | Canto | GregoBase | Fonte / versão | Observação |
 |---|---|---|---|
@@ -160,8 +166,8 @@ Acrescenta cantos à lista ad libitum oficial (o mesmo menu dos que já existiam
 ### Como funciona
 1. O ID entra no fim da lista `miscChantIDs` em `download-gabc.js`.
 2. Se o nome do GregoBase não serve (por exemplo, dois cantos com o mesmo nome), o nome do menu
-   vai em **`miscChantNames`** (mapa `ID → nome`), criado por nós no `download-gabc.js`.
-   Ele muda só o nome no menu; o cabeçalho do arquivo `.gabc` continua com o nome original.
+   ia em **`miscChantNames`** (mapa `ID → nome`), que tínhamos criado no `download-gabc.js`
+   e que saiu com a reversão; recriar se for preciso. Ele mudava só o nome no menu; o cabeçalho do arquivo `.gabc` continua com o nome original.
 3. Rodar `node download-gabc.js` baixa tudo de novo e regenera os arquivos (seção 2.4).
 
 ### Arquivos
@@ -526,7 +532,8 @@ O APK de release não instala por cima do de depuração (chaves diferentes): de
 ### Adicionar um canto oficial
 ```bash
 cd "Cantemus/jgabc"          # branch cantemus
-# 1. pôr o ID em miscChantIDs (e, se preciso, o nome em miscChantNames) no download-gabc.js
+# (normalmente basta o My chants; isto é para um canto que entre na lista oficial)
+# 1. pôr o ID em miscChantIDs no download-gabc.js
 node download-gabc.js          # baixa tudo e regenera os arquivos
 git status && git diff miscChants.js   # conferir que só mudou o esperado
 git add ... && git commit
