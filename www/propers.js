@@ -3415,7 +3415,10 @@ $(function(){
   $selTempus.change(selectedTempus);
   $selOrdinary.change(selectedOrdinary).change();
   var key = (navigator.language || navigator.browserLanguage || 'en').match(/en/)?'en':'title';
-  if(location.search.match(/\bla\b/)) key = 'title';
+  var latinForced = location.search.match(/\bla\b/);
+  if(latinForced) key = 'title';
+  // the names of the days, translated when a language other than English is chosen (js/i18n.js)
+  var dayName = function(o) { return window.I18n && !latinForced? I18n.dayName(o, key) : o[key]; };
   var populate = function(keys,$sel) {
     var $optGroup;
     $.each(keys,function(i,o){
@@ -3427,13 +3430,13 @@ $(function(){
       }
       var $temp;
       if(o.group) {
-        $optGroup = $('<optgroup></optgroup>').attr('label',o[key]);
+        $optGroup = $('<optgroup></optgroup>').attr('label',dayName(o));
         $sel.append($optGroup);
         return;
       } else if(o.children) {
-        populate(o.children, $temp = $('<optgroup></optgroup>').attr('label',o[key]));
+        populate(o.children, $temp = $('<optgroup></optgroup>').attr('label',dayName(o)));
       } else {
-        $temp = $('<option></option>').text(o[key]);
+        $temp = $('<option></option>').text(dayName(o));
         if(typeof(o.key)=='string') {
           $temp.val(o.key);
         } else {
