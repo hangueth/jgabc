@@ -564,6 +564,9 @@ git -c merge.renameLimit=100000 -c diff.renameLimit=100000 -c merge.directoryRen
 No branch do app, o site fica em `www/`; essas opções fazem o Git perceber isso. Arquivos de
 ferramentas que o branch `cordova` apagou (`download-gabc.js`, `texts.js` etc.) devem
 **continuar apagados** no conflito (`git rm`).
+**Arquivos novos** (ex.: `icon/cantemus-16.png`) podem cair na raiz em vez de `www/`: conferir com
+`git status` e mover com `git mv arquivo www/...` antes do commit. Conflito comum: nas páginas do
+app, o Benjamin põe o `cordova.js` logo antes do `<link rel="icon">`; manter as duas coisas.
 
 ---
 
