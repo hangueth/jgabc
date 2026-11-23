@@ -579,6 +579,41 @@ mais fácil esse passo fica. Por isso o My chants vive em arquivo próprio.
 
 ---
 
+## 10c. Tradução para o português (etapa 1: rubricas e interface)
+
+**O que faz:** com o idioma em português, a página do Próprio mostra em português as **rubricas**
+(92, quase todas da Semana Santa, Candelária, Cinzas, Rogações e Defuntos), os **títulos** das
+cerimônias extras (13) e a **interface** (menus, botões, avisos: ~80 frases). O latim (cantos,
+citações nas rubricas, nomes das partes) nunca muda. Os **nomes dos dias** continuam como antes
+(latim, ou inglês em aparelhos em inglês): são a etapa 2.
+
+**Idioma:** um seletor ao lado do botão do modo escuro (English / Português), guardado em
+`localStorage.lang`; sem escolha, aparelho em português → pt-BR, os demais → inglês.
+
+**Como funciona:**
+- `js/i18n.js`: o tradutor. `I18n.t(texto)`, `I18n.rubric(texto)`, `I18n.title(texto)`; traduz a
+  página ao abrir e o que aparece depois (MutationObserver), comparando o **texto inteiro** de
+  cada nó com as chaves do dicionário. Pula o canto (svg), leituras, editores, `.rubric` e
+  `.no-i18n`.
+- `js/i18n-pt-BR.js`: o dicionário (`ui`, `titles`, `rubrics`), chave = texto em inglês
+  **exatamente** como no app. Gerado por script a partir do `propersdata.js`, conferindo que as
+  citações `< >` e as marcas `v/.`, `r/.`, `[ ]` ficaram iguais.
+- `propers.js` (3 linhas): `makeRubric` passa cada rubrica por `I18n.rubric`; o título dos
+  cantos extras por `I18n.title`; o botão "Show/Hide" dos cantos extras compara com
+  `I18n.t('Show')` (era a única lógica que lia o texto da tela).
+- `propers.html`: carrega os dois arquivos antes do `propers.js`.
+- Vocabulário: `docs/GLOSSARIO-PT.md` (base: Missal Quotidiano de D. Beda Keckeisen, 1947).
+
+**Limitações:** só a página do Próprio (não o transcritor, os tons de salmo, as leituras); as
+janelas do My chants e a barra de reprodução continuam em inglês, salvo "Play"; o PDF rápido não
+tem rubricas, então não muda. As rubricas precisam de revisão de alguém do coro.
+
+**Teste:** `i18n-test.mjs`, `leftover-test.mjs`, `showhide-test.mjs` (scratchpad): Sexta e Sábado
+Santo (ante 1955) sem nenhuma rubrica em inglês; nada do dicionário sobra sem traduzir; o "Mostrar
+cantos extras" abre e fecha nos dois idiomas; inglês igual a antes.
+
+---
+
 ## 10b. Áudio: o som que para (investigação de 2026-11-22)
 
 **Queixa:** avaliações da Play Store (2019–2025) e a issue bbloomf/jgabc#91 dizem que o som
