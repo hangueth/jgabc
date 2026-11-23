@@ -89,3 +89,18 @@ segue o vocabulário e o jeito de dizer do missal, mas não copia as suas frases
 - As marcas `v/.` e `r/.` (℣ e ℟) ficam iguais.
 - "Show"/"Hide" podem ser traduzidos: o `propers.js` compara o botão dos cantos extras com
   `I18n.t('Show')`.
+
+## Nomes dos dias (menus)
+
+- Base: calendário e índice dos santos do Missal (PDF 26–40 e 1374–1377), com a ortografia
+  atual (Inês, Brás, Luís, Tomás em vez de Inez, Braz, Luiz, Tomaz).
+- Santos por extenso: **São** / **Santo** (antes de vogal ou H: Santo Antônio, Santo Hilário) /
+  **Santa**; vários santos: "São Fabiano e São Sebastião" ou "Santos Nereu, Aquileu…".
+- Nossa Senhora (não "B.V.M."): "Assunção de Nossa Senhora", "Imaculado Coração de Maria".
+- Domingos: "1.º Domingo do Advento", "10.º Domingo depois de Pentecostes"; semanas da
+  Quaresma: "Segunda-feira da 1.ª semana da Quaresma"; Têmporas: "Quarta-feira das Têmporas…".
+- Datas: "5 jan.", "23 ou 24 fev.", meses jan. fev. mar. abr. maio jun. jul. ago. set. out. nov.
+  dez.; festa transferida: "(5 abr. 2027)". "(pre 1955)" → "(antes de 1955)".
+- No modo **Português (dias em latim)**, os nomes vêm do campo `title` do `propersdata.js` (os
+  dos santos foram escritos no estilo dos cabeçalhos do Missale Romanum: *S Telesphori Papæ et
+  Mart*); só as datas ficam em português.
