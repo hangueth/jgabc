@@ -461,6 +461,12 @@ e `syncAdLibExtras`. **My chants depende do botão +** (não funciona sem ele).
     cantos transparentes, dentro do círculo de 192 dp. O mesmo nos modos claro e escuro.
     Antes aparecia o robô do Cordova: o `splashscreen.xml` herdado nunca existiu, nem no Benjamin.
   - Os arquivos de `res/` são ignorados pelo `.gitignore` do Benjamin: entram com `git add -f`.
+- **Favicon do site** (2026-11-23, branch `cantemus`): `icon/cantemus-16.png` e `-32.png` (aba do
+  navegador) são um **desenho simplificado** do ícone (couro, moldura dourada, 3 linhas e 4 notas),
+  porque o ícone reduzido a 16 px vira borrão; `-192.png` é o ícone inteiro com os cantos
+  transparentes; `-180.png` (`apple-touch-icon`, iPhone) é o ícone inteiro opaco (o iOS arredonda).
+  Nas páginas `propers`, `psalmtone`, `readings`, `transcriber`, `legacy` (trocando o
+  `clear-main.png` do Benjamin) e `faq`. Os ícones do Benjamin continuam em `icon/`.
 - **Release no GitHub:** tag `cantemus-v<versão>` (as tags sem prefixo, como `1.9.32`, são do
   Benjamin), título "Cantemus <versão>", com o APK de release assinado anexado.
 
