@@ -584,10 +584,9 @@ mais fácil esse passo fica. Por isso o My chants vive em arquivo próprio.
 **O que faz:** com o idioma em português, a página do Próprio mostra em português as **rubricas**
 (92, quase todas da Semana Santa, Candelária, Cinzas, Rogações e Defuntos), os **títulos** das
 cerimônias extras (13) e a **interface** (menus, botões, avisos: ~80 frases). O latim (cantos,
-citações nas rubricas, nomes das partes) nunca muda. Os **nomes dos dias** continuam como antes
-(latim, ou inglês em aparelhos em inglês): são a etapa 2.
+citações nas rubricas, nomes das partes) nunca muda. Os **nomes dos dias** vieram na etapa 2 (abaixo).
 
-**Idioma:** um seletor ao lado do botão do modo escuro (English / Português), guardado em
+**Idioma:** um seletor ao lado do botão do modo escuro (English / Português / Português (dias em latim)), guardado em
 `localStorage.lang`; sem escolha, aparelho em português → pt-BR, os demais → inglês.
 
 **Como funciona:**
@@ -611,6 +610,36 @@ tem rubricas, então não muda. As rubricas precisam de revisão de alguém do c
 **Teste:** `i18n-test.mjs`, `leftover-test.mjs`, `showhide-test.mjs` (scratchpad): Sexta e Sábado
 Santo (ante 1955) sem nenhuma rubrica em inglês; nada do dicionário sobra sem traduzir; o "Mostrar
 cantos extras" abre e fecha nos dois idiomas; inglês igual a antes.
+
+### Etapa 2: nomes dos dias (2026-11-23)
+
+**O que faz:** os menus do Próprio do Tempo, dos Santos, das Missas votivas e do Comum (cerca de
+515 nomes) em português, com datas em português ("5 jan.: São Telésforo", "23 ou 24 fev.",
+festa transferida "(5 abr. 2027)"). O seletor ganhou **Português (dias em latim)**: tudo em
+português, mas os nomes dos dias em latim (com as datas em português).
+
+**Nomes latinos dos santos:** só 20 dos 300 santos tinham nome em latim (o campo `title` do
+`propersdata.js` repetia o inglês). Os 282 que faltavam foram escritos no estilo dos cabeçalhos
+do Missale Romanum (*S Telesphori Papæ et Mart*), direto no `propersdata.js`: vale também para
+o Chant Tools em aparelhos que não estão em inglês. Commit separado, para poder ser oferecido
+sozinho ao Benjamin.
+
+**Como funciona:**
+- `propers.js` (`populate`): o texto de cada opção passa por `I18n.dayName(o, key)`.
+- `js/i18n.js` (`dayName`): separa recuo, data e sufixo de festa transferida; traduz o nome pelas
+  tabelas `days` (chave = nome em inglês sem a data) ou `daysByKey` (chave do dia: todos os santos
+  e os domingos "que sobraram depois da Epifania", que em inglês têm o mesmo nome dos outros);
+  meses e "ou" pelas tabelas `months` e `or`. Nome ausente do dicionário → como antes.
+- A variante `pt-BR-la` (`{base: pt-BR, latinDays: true}`) usa o dicionário pt-BR e o `title`.
+- Sem idioma escolhido (ou escolhido "English" num aparelho que não é inglês) os menus ficam
+  como antes; "English" escolhido mostra os nomes em inglês.
+- Convenções dos nomes: `docs/GLOSSARIO-PT.md`, seção "Nomes dos dias".
+
+**Branch para o Benjamin:** `pt-br` (a partir do `upstream/master`, sem o My chants): 1. etapa 1;
+2. nomes latinos dos santos; 3. etapa 2. Testado no Firefox sobre o código puro dele.
+
+**Teste:** `days-test.mjs` (scratchpad): os três idiomas e "sem escolha"; nenhum nome sem
+tradução em português; escolher um santo pelo menu carrega o próprio dele.
 
 ---
 
