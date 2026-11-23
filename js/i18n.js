@@ -6,8 +6,12 @@
 // - The rest of the page is translated as it appears: every text node, <option> and title/placeholder whose whole
 //   (trimmed) text is a key of the "ui" table, also those added later (menus, dialogs), except inside the chant
 //   (svg), the readings, editors and rubrics.
+// - The names of the days in the menus (Proper of the Time, of the Saints, Votive Masses, Commons) go through dayName,
+//   with the "days" table (keyed by the English name, without its date) and "daysByKey" (by the day's key, for the
+//   few English names that stand for two different days).
 // - The language is the one chosen in the menu next to the dark mode button (kept in localStorage.lang), or else the
 //   device's: Portuguese devices get pt-BR, the others English.
+// - A variant ({base: 'pt-BR', latinDays: true}) uses its base's dictionary but keeps the days' Latin names.
 var I18n = (function() {
   var dictionaries = {},
       languages = [{ code: 'en', name: 'English' }],
@@ -27,9 +31,14 @@ var I18n = (function() {
     dictionaries[code] = dictionary;
     languages.push({ code: code, name: dictionary.name || code });
   }
+  // the dictionary with the tables of the current language (a variant's base)
+  function tables() {
+    var dictionary = dictionaries[lang];
+    return dictionary && dictionary.base? dictionaries[dictionary.base] : dictionary;
+  }
   // the translation of text from the given table ('ui' by default), or text itself; whitespace around it is kept
   function t(text, table) {
-    var dictionary = dictionaries[lang];
+    var dictionary = tables();
     if(!dictionary || typeof(text) != 'string') return text;
     var entries = dictionary[table || 'ui'] || {},
         key = text.trim();
@@ -37,6 +46,40 @@ var I18n = (function() {
   }
   function rubric(text) { return t(text, 'rubrics'); }
   function title(text) { return t(text, 'titles'); }
+
+  // The name of a day for the menus: o is an entry of propersdata.js ({key, title (Latin), en}) and key the field
+  // propers.js would show ('title' or 'en'). Dates ("Feb 23 or 24: ", " (2027: Mar 25)") follow the dictionary's
+  // "months"; a name missing from the dictionary is shown as before.
+  var regexDate = /^([A-Z][a-z]{2}) (\d+)(?: (?:or|vel) (\d+))?: /,
+      regexTransferred = / \((\d{4}): ([A-Z][a-z]{2}) (\d+)\)$/;
+  function dayName(o, key) {
+    var dictionary = dictionaries[lang],
+        days = tables();
+    if(!dictionary) return storedLanguage() == 'en' && o.en != null? o.en : o[key];
+    var text = dictionary.latinDays? o.title : o.en;
+    if(typeof(text) != 'string') return o[key];
+    var months = days.months || {},
+        month = function(m) { return months[m] || m; },
+        indent = text.match(/^\s*/)[0],
+        date = '', transferred = '', match;
+    text = text.slice(indent.length);
+    if((match = regexDate.exec(text))) {
+      date = match[2] + (match[3]? ' ' + (days.or || 'or') + ' ' + match[3] : '') + ' ' + month(match[1]) + ': ';
+      text = text.slice(match[0].length);
+    }
+    if((match = regexTransferred.exec(text))) {
+      transferred = ' (' + match[3] + ' ' + month(match[2]) + ' ' + match[1] + ')';
+      text = text.slice(0, match.index);
+    }
+    if(!dictionary.latinDays) {
+      var byKey = days.daysByKey || {}, byName = days.days || {},
+          has = Object.prototype.hasOwnProperty;
+      if(typeof(o.key) == 'string' && has.call(byKey, o.key)) text = byKey[o.key];
+      else if(has.call(byName, text)) text = byName[text];
+      else return o[key];
+    }
+    return indent + date + text + transferred;
+  }
 
   // DOM translation
   var skip = 'svg, script, style, textarea, [contenteditable], .rubric, .lectio-text, .no-i18n';
@@ -103,7 +146,7 @@ var I18n = (function() {
   function start() {
     addLanguageMenu();
     if(!dictionaries[lang]) return;
-    document.documentElement.lang = lang;
+    document.documentElement.lang = dictionaries[lang].base || lang;
     translateTree(document.body);
     new MutationObserver(function(mutations) {
       mutations.forEach(function(mutation) {
@@ -114,5 +157,5 @@ var I18n = (function() {
   if(document.readyState == 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
 
-  return { add: add, t: t, rubric: rubric, title: title, language: function() { return lang; } };
+  return { add: add, t: t, rubric: rubric, title: title, dayName: dayName, language: function() { return lang; } };
 })();
