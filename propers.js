@@ -1236,7 +1236,7 @@ $(function(){
     var $this = $('#divExtraChants a.showHide'),
         $showHide = $this.find('span.showHide'),
         $container = $('#extra-chants'),
-        showHide = typeof(e)=='boolean'? e : $showHide.text() === 'Show';
+        showHide = typeof(e)=='boolean'? e : $showHide.text() === (window.I18n? I18n.t('Show') : 'Show');
     $showHide.text(showHide? 'Hide' : 'Show');
     $container.toggle(showHide);
     if(showHide && $container.is(':empty')) {
@@ -1247,6 +1247,8 @@ $(function(){
   function makeRubric(rubric,extraClass) {
     var classes = 'rubric ' + (extraClass || '');
     if(typeof(rubric) == 'string') rubric = [rubric];
+    // translated when a language other than English is chosen (js/i18n.js)
+    if(window.I18n) rubric = rubric.map(I18n.rubric);
     return rubric.reduce(function(jq,rubric) { return (jq.add($('<div>').addClass(classes).html(
           rubric.replace(/>/g,'</span>').
             replace(/<(?!\/?\w+>)/g,'<span class="quote">').
@@ -1274,7 +1276,7 @@ $(function(){
         }
       }
       if(chant.title) {
-        $curContainer.append($('<div>').addClass('chant-title').html(chant.title.replace(/</g,'<span class="rubric">').replace(/>/g,'</span>')));
+        $curContainer.append($('<div>').addClass('chant-title').html((window.I18n? I18n.title(chant.title) : chant.title).replace(/</g,'<span class="rubric">').replace(/>/g,'</span>')));
       }
       if(chant.rubric) {
         $curContainer.append(makeRubric(chant.rubric));
