@@ -586,6 +586,11 @@ cd ../jgabc-cordova && git fetch upstream && git merge upstream/cordova   # part
 O Benjamin usa o próprio Claude e muda bastante o `propers.js`. Quanto menos mexermos nele,
 mais fácil esse passo fica. Por isso o My chants vive em arquivo próprio.
 
+**README:** no `cantemus`, o `README` do Benjamin foi apagado e trocado pelo `README.md` bilíngue
+do Cantemus (capturas em `docs/img/`). Se ele mudar o `README` dele, o merge acusa conflito
+"modificado/apagado": manter apagado (`git rm README`). A cada versão nova, conferir se o
+`README.md` continua certo; os links de download apontam sempre para `releases/latest`.
+
 ---
 
 ## 10c. Tradução para o português (etapas 1 a 3)
