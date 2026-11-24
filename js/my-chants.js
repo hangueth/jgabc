@@ -9,6 +9,17 @@ var MyChants = (function() {
       gregobase = 'https://gregobase.selapa.net/',
       listeners = [];
 
+  // text in the user's language (js/i18n.js, if the page has it; the English text is the key), with each {name} replaced
+  // by values.name, e.g. _('Downloading GregoBase {id}…', {id: 3973})
+  function _(text, values) {
+    if(window.I18n) text = I18n.t(text);
+    return values? text.replace(/\{(\w+)\}/g, function(match, key) { return key in values? values[key] : match; }) : text;
+  }
+  // _ of one or many, by n: plural(2, '{n} chant', '{n} chants') → "2 chants"
+  function plural(n, one, many) {
+    return _(n == 1? one : many, { n: n });
+  }
+
   function load() {
     try {
       var lib = JSON.parse(localStorage[storageKey] || '{}');
@@ -21,7 +32,7 @@ var MyChants = (function() {
     try {
       localStorage[storageKey] = JSON.stringify(lib);
     } catch(e) {
-      throw new Error("The chant couldn't be saved on this device (" + e.message + ").");
+      throw new Error(_("The chant couldn't be saved on this device ({error}).", { error: e.message }));
     }
     listeners.forEach(function(f) { f(); });
   }
@@ -75,7 +86,7 @@ var MyChants = (function() {
   // throws unless the text looks like a GABC score with a header; returns it with \n line ends and fixGabc applied
   function checkGabc(gabc) {
     if(typeof(gabc) != 'string' || gabc.indexOf('%%') < 0 || !/\([^)]*\)/.test(gabc.slice(gabc.indexOf('%%')))) {
-      throw new Error(/^\s*wrong id\s*$/i.test(gabc || '')? 'GregoBase has no chant with this ID.' : "This isn't a GABC score.");
+      throw new Error(/^\s*wrong id\s*$/i.test(gabc || '')? _('GregoBase has no chant with this ID.') : _("This isn't a GABC score."));
     }
     return fixGabc(gabc.replace(/\r\n?/g, '\n'));
   }
@@ -96,16 +107,16 @@ var MyChants = (function() {
           function(response) { resolve(response.data); },
           function(response) {
             // -2: the secure connection failed (an unknown certificate, or the device's date and time are wrong)
-            reject(new Error(response.status > 0? 'GregoBase answered ' + response.status + '.' :
-              response.status == -2? "Couldn't connect securely to GregoBase. Check that this device's date and time are right. (" + response.error + ')' :
-              (response.error || 'No connection.')));
+            reject(new Error(response.status > 0? _('GregoBase answered {status}.', { status: response.status }) :
+              response.status == -2? _("Couldn't connect securely to GregoBase. Check that this device's date and time are right. ({error})", { error: response.error }) :
+              (response.error || _('No connection.'))));
           });
       } else {
         fetch(url).then(function(response) {
-          if(!response.ok) throw new Error('GregoBase answered ' + response.status + '.');
+          if(!response.ok) throw new Error(_('GregoBase answered {status}.', { status: response.status }));
           return response.text();
         }).then(resolve, function(e) {
-          var error = new Error("The app can't download from GregoBase here.");
+          var error = new Error(_("The app can't download from GregoBase here."));
           error.canPaste = true;
           reject(error);
         });
@@ -149,10 +160,10 @@ var MyChants = (function() {
       if(sharing) {
         sharing.shareWithOptions({
           files: ['df:' + name + ';data:application/json;base64,' + base64(text)],
-          chooserTitle: 'Save or send My chants'
-        }, resolve, function(error) { reject(new Error('The file could not be shared (' + error + ').')); });
+          chooserTitle: _('Save or send My chants')
+        }, resolve, function(error) { reject(new Error(_('The file could not be shared ({error}).', { error: error }))); });
       } else if(window.cordova) {
-        reject(new Error("This version of the app can't export files."));
+        reject(new Error(_("This version of the app can't export files.")));
       } else {
         var url = URL.createObjectURL(new Blob([text], { type: 'application/json' })),
             link = document.createElement('a');
@@ -174,7 +185,7 @@ var MyChants = (function() {
     } catch(e) {}
     if(!data || (data.format != fileFormat && oldFileFormats.indexOf(data.format) < 0) ||
         !data.chants || typeof(data.chants) != 'object') {
-      throw new Error("This isn't a My chants file (exported with “Export My chants”).");
+      throw new Error(_("This isn't a My chants file (exported with “Export My chants”)."));
     }
     var result = { chants: [], invalid: 0 };
     Object.keys(data.chants).forEach(function(id) {
@@ -205,19 +216,16 @@ var MyChants = (function() {
     return new Promise(function(resolve, reject) {
       var reader = new FileReader();
       reader.onload = function() { resolve(reader.result); };
-      reader.onerror = function() { reject(new Error('The file could not be read.')); };
+      reader.onerror = function() { reject(new Error(_('The file could not be read.'))); };
       reader.readAsText(file);
     });
   }
-  function plural(n, one, many) {
-    return n + ' ' + (n == 1? one : many);
-  }
   function importSummary(result) {
     var parts = [];
-    if(result.added.length) parts.push(plural(result.added.length, 'chant was', 'chants were') + ' added');
-    if(result.already) parts.push(plural(result.already, 'was', 'were') + ' already in the app');
-    if(result.invalid) parts.push(plural(result.invalid, 'was', 'were') + ' damaged and left out');
-    if(!parts.length) return 'The file has no chants.';
+    if(result.added.length) parts.push(plural(result.added.length, '{n} chant was added', '{n} chants were added'));
+    if(result.already) parts.push(plural(result.already, '{n} was already in the app', '{n} were already in the app'));
+    if(result.invalid) parts.push(plural(result.invalid, '{n} was damaged and left out', '{n} were damaged and left out'));
+    if(!parts.length) return _('The file has no chants.');
     var text = parts.join('; ') + '.';
     return text.charAt(0).toUpperCase() + text.slice(1);
   }
@@ -239,7 +247,7 @@ var MyChants = (function() {
       $overlay.remove();
       $(document).off('keydown.myChants');
     };
-    $('<button class="btn btn-xs btn-default my-chants-close" title="Close"><span class="glyphicon glyphicon-remove"></span></button>')
+    $('<button class="btn btn-xs btn-default my-chants-close"><span class="glyphicon glyphicon-remove"></span></button>').attr('title', _('Close'))
       .click(close).appendTo($head);
     $overlay.on('mousedown', function(e) { if(e.target === this) close(); });
     $(document).on('keydown.myChants', function(e) { if(e.key == 'Escape') close(); });
@@ -254,45 +262,43 @@ var MyChants = (function() {
   // onAdded(id) is called with the ID of each chant added.
   function showAddDialog(options) {
     options = options || {};
-    var d = dialog('Add a chant from GregoBase'),
+    var d = dialog(_('Add a chant from GregoBase')),
         $body = d.$body,
         isOfficial = options.isOfficial || function() { return false; };
-    var $intro = $('<p></p>').html('Paste the link or the ID of the chant on <a target="_blank" href="' + gregobase + '">GregoBase</a>, ' +
-      'e.g. <i>' + gregobase + 'chant.php?id=3973</i> ').appendTo($body),
+    var links = { gregobase: '<a target="_blank" href="' + gregobase + '">GregoBase</a>', example: '<i>' + chantUrl(3973) + '</i>' },
+        $intro = $('<p></p>').html(_('Paste the link or the ID of the chant on {gregobase}, e.g. {example}', links) + ' ').appendTo($body),
         $help = $('<div class="my-chants-help"></div>').html(
-          '<p><b>What is GregoBase?</b> A free website, with no login, that holds a huge index of Gregorian chants ' +
+          '<p>' + _('<b>What is GregoBase?</b> A free website, with no login, that holds a huge index of Gregorian chants ' +
           '(antiphons, hymns, sequences, Mass chants…), transcribed by volunteers. Chant Tools takes its chants from there, ' +
-          'so any chant on GregoBase can be brought into this app.</p>' +
-          '<p><b>How to bring a chant:</b></p>' +
+          'so any chant on GregoBase can be brought into this app.') + '</p>' +
+          '<p><b>' + _('How to bring a chant:') + '</b></p>' +
           '<ol>' +
-          '<li>Open <a target="_blank" href="' + gregobase + '">GregoBase</a> and look for the chant by its first words ' +
-          '(the search box, or the lists by type or by book).</li>' +
-          '<li>Open the chant. The address of its page looks like <i>' + gregobase + 'chant.php?id=3973</i>; ' +
-          'the number at the end is its ID.</li>' +
-          '<li>Copy that address (or just the number), paste it in the field below and tap <b>Add</b>.</li>' +
+          '<li>' + _('Open {gregobase} and look for the chant by its first words (the search box, or the lists by type or by book).', links) + '</li>' +
+          '<li>' + _('Open the chant. The address of its page looks like {example}; the number at the end is its ID.', links) + '</li>' +
+          '<li>' + _('Copy that address (or just the number), paste it in the field below and tap <b>Add</b>.') + '</li>' +
           '</ol>' +
-          '<p>The chant is then kept on this device and appears in every ad libitum menu, marked with *.</p>'
+          '<p>' + _('The chant is then kept on this device and appears in every ad libitum menu, marked with *.') + '</p>'
         ).hide().appendTo($body);
-    $('<button type="button" class="btn btn-xs btn-link my-chants-info" title="What is GregoBase, and how to find a chant">' +
-      '<span class="glyphicon glyphicon-info-sign"></span></button>')
+    $('<button type="button" class="btn btn-xs btn-link my-chants-info">' +
+      '<span class="glyphicon glyphicon-info-sign"></span></button>').attr('title', _('What is GregoBase, and how to find a chant'))
       .click(function(e) { e.preventDefault(); $help.toggle(); }).appendTo($intro);
     var $form = $('<form class="my-chants-form"></form>').appendTo($body),
-        $input = $('<input type="text" class="form-control" placeholder="GregoBase link or ID" autocomplete="off">').val(options.id || '').appendTo($form),
-        $name = $('<input type="text" class="form-control" placeholder="Name in the menu (optional)" autocomplete="off">').appendTo($form),
-        $add = $('<button type="submit" class="btn btn-sm btn-primary">Add</button>').appendTo($form),
+        $input = $('<input type="text" class="form-control" autocomplete="off">').attr('placeholder', _('GregoBase link or ID')).val(options.id || '').appendTo($form),
+        $name = $('<input type="text" class="form-control" autocomplete="off">').attr('placeholder', _('Name in the menu (optional)')).appendTo($form),
+        $add = $('<button type="submit" class="btn btn-sm btn-primary"></button>').text(_('Add')).appendTo($form),
         $status = $('<div class="my-chants-status" aria-live="polite"></div>').appendTo($body),
         $paste = $('<div class="my-chants-paste"></div>').hide().appendTo($body),
         $pasteText = $('<p></p>').appendTo($paste),
-        $gabc = $('<textarea class="form-control" rows="6" spellcheck="false" placeholder="Paste the GABC here"></textarea>').appendTo($paste),
-        $addPasted = $('<button class="btn btn-sm btn-primary">Add the pasted chant</button>').appendTo($paste),
+        $gabc = $('<textarea class="form-control" rows="6" spellcheck="false"></textarea>').attr('placeholder', _('Paste the GABC here')).appendTo($paste),
+        $addPasted = $('<button class="btn btn-sm btn-primary"></button>').text(_('Add the pasted chant')).appendTo($paste),
         $list = $('<div class="my-chants-list"></div>').appendTo($body),
         $files = $('<div class="my-chants-buttons my-chants-files"></div>').appendTo($body),
-        $export = $('<button class="btn btn-sm btn-default"><span class="glyphicon glyphicon-export"></span> Export My chants</button>').appendTo($files),
-        $import = $('<button class="btn btn-sm btn-default"><span class="glyphicon glyphicon-import"></span> Import a file</button>').appendTo($files),
+        $export = $('<button class="btn btn-sm btn-default"><span class="glyphicon glyphicon-export"></span> </button>').append(document.createTextNode(_('Export My chants'))).appendTo($files),
+        $import = $('<button class="btn btn-sm btn-default"><span class="glyphicon glyphicon-import"></span> </button>').append(document.createTextNode(_('Import a file'))).appendTo($files),
         $file = $('<input type="file" style="display: none">').appendTo($files),
         $fileStatus = $('<div class="my-chants-status" aria-live="polite"></div>').appendTo($body);
-    $('<p class="my-chants-hint"></p>').text('Export saves all your chants in one file, as a backup or to send to other singers; ' +
-      'Import adds the chants of such a file.').insertBefore($files);
+    $('<p class="my-chants-hint"></p>').text(_('Export saves all your chants in one file, as a backup or to send to other singers; ' +
+      'Import adds the chants of such a file.')).insertBefore($files);
     $export.click(function(e) {
       e.preventDefault();
       status($fileStatus, '');
@@ -305,7 +311,7 @@ var MyChants = (function() {
     $file.on('change', function() {
       var file = this.files && this.files[0];
       if(!file) return;
-      status($fileStatus, 'Reading ' + file.name + '…');
+      status($fileStatus, _('Reading {file}…', { file: file.name }));
       readFile(file).then(function(text) {
         var result = importText(text, isOfficial);
         status($fileStatus, importSummary(result));
@@ -313,7 +319,7 @@ var MyChants = (function() {
       }).catch(function(error) { status($fileStatus, error.message, true); });
     });
     var added = function(id, name) {
-      status($status, '“' + name + '” was added to My chants.');
+      status($status, _('“{name}” was added to My chants.', { name: name }));
       $input.val('');
       $name.val('');
       $gabc.val('');
@@ -325,17 +331,17 @@ var MyChants = (function() {
       e.preventDefault();
       var id = parseId($input.val());
       $paste.hide();
-      if(!id) return status($status, 'Paste a GregoBase link (…chant.php?id=…) or a number.', true);
-      if(isOfficial(id)) return status($status, 'This chant is already in the list of ad libitum chants.', true);
-      status($status, 'Downloading GregoBase ' + id + '…');
+      if(!id) return status($status, _('Paste a GregoBase link (…chant.php?id=…) or a number.'), true);
+      if(isOfficial(id)) return status($status, _('This chant is already in the list of ad libitum chants.'), true);
+      status($status, _('Downloading GregoBase {id}…', { id: id }));
       $add.prop('disabled', true);
       install(id, $name.val().trim()).then(function(name) {
         added(id, name);
       }, function(error) {
         status($status, error.message, true);
         if(error.canPaste) {
-          $pasteText.html('Open <a target="_blank" href="' + chantUrl(id) + '">the chant on GregoBase</a>, ' +
-            'copy all the text in its <b>GABC</b> box (Ctrl+A, Ctrl+C) and paste it below.');
+          $pasteText.html(_('Open <a target="_blank" href="{url}">the chant on GregoBase</a>, ' +
+            'copy all the text in its <b>GABC</b> box (Ctrl+A, Ctrl+C) and paste it below.', { url: chantUrl(id) }));
           $paste.data('id', id).show();
         }
       }).then(function() { $add.prop('disabled', false); });
@@ -357,15 +363,15 @@ var MyChants = (function() {
       $list.empty();
       $export.prop('disabled', !chants.length);
       if(!chants.length) return;
-      $('<h5>My chants</h5>').appendTo($list);
-      $('<p class="my-chants-hint-inline"></p>').text('In the ad libitum menus, they are among the other chants, marked with *.').appendTo($list);
+      $('<h5></h5>').text(_('My chants')).appendTo($list);
+      $('<p class="my-chants-hint-inline"></p>').text(_('In the ad libitum menus, they are among the other chants, marked with *.')).appendTo($list);
       var $ul = $('<ul></ul>').appendTo($list);
       chants.forEach(function(chant) {
         var $li = $('<li></li>').appendTo($ul);
         chantLink(chant).appendTo($li);
-        $('<button class="btn btn-xs btn-default" title="Remove from My chants"><span class="glyphicon glyphicon-trash"></span></button>')
+        $('<button class="btn btn-xs btn-default"><span class="glyphicon glyphicon-trash"></span></button>').attr('title', _('Remove from My chants'))
           .click(function() {
-            if(!confirm('Remove “' + chant.name + '” from My chants?')) return;
+            if(!confirm(_('Remove “{name}” from My chants?', { name: chant.name }))) return;
             remove(chant.id);
             renderList();
           }).appendTo($li);
@@ -380,7 +386,7 @@ var MyChants = (function() {
   // text is the file's content, or an Error if it couldn't be read.
   function showImportDialog(text, options) {
     options = options || {};
-    var d = dialog('Import My chants'),
+    var d = dialog(_('Import My chants')),
         $body = d.$body,
         file;
     try {
@@ -388,45 +394,48 @@ var MyChants = (function() {
       file = parseFile(text);
     } catch(error) {
       $('<p class="my-chants-error"></p>').text(error.message).appendTo($body);
-      $('<div class="my-chants-buttons"></div>').append($('<button class="btn btn-sm btn-default">Close</button>').click(d.close)).appendTo($body);
+      $('<div class="my-chants-buttons"></div>').append($('<button class="btn btn-sm btn-default"></button>').text(_('Close')).click(d.close)).appendTo($body);
       return d;
     }
     var lib = load(),
         isOfficial = options.isOfficial || function() { return false; },
         fresh = file.chants.filter(function(chant) { return !lib[chant.id] && !isOfficial(chant.id); });
-    $('<p></p>').text(!file.chants.length? 'This file has no chants.' :
-      !fresh.length? 'All the chants in this file are already in your app:' :
-      'This file has ' + plural(file.chants.length, 'chant', 'chants') + (fresh.length < file.chants.length?
-        '; ' + plural(fresh.length, 'is', 'are') + ' new (the others are already in your app):' : ':')).appendTo($body);
+    $('<p></p>').text(!file.chants.length? _('This file has no chants.') :
+      !fresh.length? _('All the chants in this file are already in your app:') :
+      fresh.length == file.chants.length? plural(file.chants.length, 'This file has {n} chant:', 'This file has {n} chants:') :
+      _('This file has {chants}; {new} (the others are already in your app):', {
+        chants: plural(file.chants.length, '{n} chant', '{n} chants'),
+        new: plural(fresh.length, '{n} is new', '{n} are new')
+      })).appendTo($body);
     var $ul = $('<ul class="my-chants-missing"></ul>').appendTo($body);
     file.chants.slice().sort(function(a, b) { return a.name.localeCompare(b.name); }).forEach(function(chant) {
       var $li = $('<li></li>').appendTo($ul);
       chantLink(chant).appendTo($li);
-      if(fresh.indexOf(chant) < 0) $('<span class="my-chants-item-status"></span>').text(' — already in the app').appendTo($li);
+      if(fresh.indexOf(chant) < 0) $('<span class="my-chants-item-status"></span>').text(' — ' + _('already in the app')).appendTo($li);
     });
-    if(file.invalid) $('<p class="my-chants-error"></p>').text(plural(file.invalid, 'chant is', 'chants are') + ' damaged and will be left out.').appendTo($body);
+    if(file.invalid) $('<p class="my-chants-error"></p>').text(plural(file.invalid, '{n} chant is damaged and will be left out.', '{n} chants are damaged and will be left out.')).appendTo($body);
     var $buttons = $('<div class="my-chants-buttons"></div>').appendTo($body),
         $status = $('<div class="my-chants-status" aria-live="polite"></div>').appendTo($body);
     if(fresh.length) {
-      $('<button class="btn btn-sm btn-primary"></button>').text('Add ' + plural(fresh.length, 'chant', 'chants') + ' to My chants')
+      $('<button class="btn btn-sm btn-primary"></button>').text(plural(fresh.length, 'Add {n} chant to My chants', 'Add {n} chants to My chants'))
         .click(function() {
           var result = importText(text, isOfficial);
           status($status, importSummary(result));
           $(this).remove();
-          $close.text('Close');
+          $close.text(_('Close'));
           if(options.onDone) options.onDone(result);
         }).appendTo($buttons);
     }
-    var $close = $('<button class="btn btn-sm btn-default"></button>').text(fresh.length? 'Not now' : 'Close').click(d.close).appendTo($buttons);
+    var $close = $('<button class="btn btn-sm btn-default"></button>').text(fresh.length? _('Not now') : _('Close')).click(d.close).appendTo($buttons);
     return d;
   }
 
   // Offers to add the chants of a shared link that aren't on this device; onDone is called once any were added.
   function offerMissing(ids, onDone) {
-    var d = dialog('Chants missing from this app'),
+    var d = dialog(_('Chants missing from this app')),
         $body = d.$body;
-    $('<p></p>').text('This link uses ' + (ids.length == 1? 'a chant' : ids.length + ' chants') +
-      ' from GregoBase that ' + (ids.length == 1? "isn't" : "aren't") + ' in your app yet:').appendTo($body);
+    $('<p></p>').text(plural(ids.length, "This link uses a chant from GregoBase that isn't in your app yet:",
+      "This link uses {n} chants from GregoBase that aren't in your app yet:")).appendTo($body);
     var $ul = $('<ul class="my-chants-missing"></ul>').appendTo($body),
         items = {};
     ids.forEach(function(id) {
@@ -435,17 +444,17 @@ var MyChants = (function() {
       items[id] = $('<span class="my-chants-item-status"></span>').appendTo($li);
     });
     var $buttons = $('<div class="my-chants-buttons"></div>').appendTo($body),
-        $add = $('<button class="btn btn-sm btn-primary">Add to My chants</button>').appendTo($buttons),
-        $later = $('<button class="btn btn-sm btn-default">Not now</button>').click(d.close).appendTo($buttons),
+        $add = $('<button class="btn btn-sm btn-primary"></button>').text(_('Add to My chants')).appendTo($buttons),
+        $later = $('<button class="btn btn-sm btn-default"></button>').text(_('Not now')).click(d.close).appendTo($buttons),
         $status = $('<div class="my-chants-status" aria-live="polite"></div>').appendTo($body);
     $add.click(function() {
       $add.prop('disabled', true);
       var anyAdded = false, canPaste = false;
       Promise.all(ids.map(function(id) {
-        status(items[id], ' — downloading…');
+        status(items[id], ' — ' + _('downloading…'));
         return install(id).then(function(name) {
           anyAdded = true;
-          status(items[id], ' — added: ' + name);
+          status(items[id], ' — ' + _('added: {name}', { name: name }));
         }, function(error) {
           canPaste = canPaste || error.canPaste;
           status(items[id], ' — ' + error.message, true);
@@ -453,10 +462,10 @@ var MyChants = (function() {
       })).then(function() {
         if(anyAdded && onDone) onDone();
         if(canPaste) {
-          status($status, 'Add them one by one with “Add a chant from GregoBase…” in an ad libitum menu, pasting their GABC.', true);
+          status($status, _('Add them one by one with “Add a chant from GregoBase…” in an ad libitum menu, pasting their GABC.'), true);
           $add.prop('disabled', false);
         } else {
-          $later.text('Close');
+          $later.text(_('Close'));
           $add.remove();
         }
       });

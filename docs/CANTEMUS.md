@@ -588,7 +588,7 @@ mais fácil esse passo fica. Por isso o My chants vive em arquivo próprio.
 
 ---
 
-## 10c. Tradução para o português (etapa 1: rubricas e interface)
+## 10c. Tradução para o português (etapas 1 a 3)
 
 **O que faz:** com o idioma em português, a página do Próprio mostra em português as **rubricas**
 (92, quase todas da Semana Santa, Candelária, Cinzas, Rogações e Defuntos), os **títulos** das
@@ -613,7 +613,7 @@ citações nas rubricas, nomes das partes) nunca muda. Os **nomes dos dias** vie
 - Vocabulário: `docs/GLOSSARIO-PT.md` (base: Missal Quotidiano de D. Beda Keckeisen, 1947).
 
 **Limitações:** só a página do Próprio (não o transcritor, os tons de salmo, as leituras); as
-janelas do My chants e a barra de reprodução continuam em inglês, salvo "Play"; o PDF rápido não
+janelas do My chants e a barra de reprodução foram traduzidas na etapa 3; o PDF rápido não
 tem rubricas, então não muda. As rubricas precisam de revisão de alguém do coro.
 
 **Teste:** `i18n-test.mjs`, `leftover-test.mjs`, `showhide-test.mjs` (scratchpad): Sexta e Sábado
@@ -649,6 +649,39 @@ sozinho ao Benjamin.
 
 **Teste:** `days-test.mjs` (scratchpad): os três idiomas e "sem escolha"; nenhum nome sem
 tradução em português; escolher um santo pelo menu carrega o próprio dele.
+
+### Etapa 3: o que ainda ficava em inglês (2026-11-24)
+
+**O que faz:** em português, também ficam traduzidos:
+- o menu do **Novus Ordo** (domingos e festas, nomes da CNBB: "20.º Domingo do Tempo Comum")
+  e os anos A/B/C;
+- o menu dos **Ordinários** ("Missa 8 - De Angelis (festas de 2.ª classe - 5.)");
+- os cantos **ad libitum** e as partes do Ordinário com inglês no nome (ladainhas, "tom
+  simples", "outra melodia", "Tom ferial");
+- a **barra de reprodução**, o **balão das notas** (nota inicial, extensão, botões de edição) e
+  dicas soltas (modo escuro, botão +, campos de busca);
+- todas as janelas do **My chants** ("Meus cantos"), com números e nomes no meio das frases.
+
+**Como funciona:**
+- Novus Ordo e cantos ad libitum ficam na tabela `ui`, não na `days`: não têm nome latino, então
+  aparecem em português também no modo "dias em latim". Os Ordinários estão nas duas: `days`
+  (nome em inglês) e `ui` (o nome "Missa 8 - …" do modo latino).
+- `js/i18n.js`: o observador agora também percebe dicas (`title`, `placeholder`, `aria-label`)
+  que mudam depois, como a do botão do modo escuro.
+- `js/my-chants.js`: cada texto passa por `_(texto, valores)`, que chama `I18n.t` (se a página
+  tiver o tradutor) e troca `{n}`, `{name}` etc. pelos valores; `plural(n, um, vários)` escolhe a
+  frase do singular ou do plural. Sem o `i18n.js` (como no branch `my-chants`), fica em inglês.
+  As chaves do dicionário são as frases em inglês **com** as chaves `{…}`, na seção "My chants".
+- Fica em inglês, de propósito: nomes das notas (C, D…), solfejo móvel (Do, Re, Di, Te…) e
+  intervalos (P8, M3) do balão das notas.
+
+**Para o Benjamin (`pt-br`):** tudo menos a seção "My chants" do dicionário e o `my-chants.js`.
+
+**Revisão:** `REVISAO-ETAPA3.html` (227 textos).
+
+**Teste:** `check3.mjs` (scratchpad): os três idiomas (modo escuro, Novus Ordo, Ordinários, ad
+libitum, janelas do My chants com singular/plural, balão das notas, barra de reprodução);
+`endiff.mjs`: em inglês e "sem escolha", texto e dicas idênticos aos de antes.
 
 ---
 
