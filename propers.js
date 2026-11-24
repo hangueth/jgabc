@@ -791,6 +791,8 @@ $(function(){
               gabc: prePart
             });
           }
+          // (the PDF has the whole chant, from effectiveGabc, rather than its pieces; Quick PDF prints the pieces, as shown)
+          gabc.forEach(function(chant) { chant.notInPdf = true; });
           $extraChantsPlaceholder.remove();
           $extraChantsPlaceholder = $('<div>').addClass('extra-chants').insertAfter($div);
           renderExtraChants($extraChantsPlaceholder, gabc, '-'+part);
@@ -1317,7 +1319,8 @@ $(function(){
           id: chant.id,
           style: 'full',
           noDropCap: !!chant.gabc || (typeof(chant.id)=='string' && chant.id.match(/-/)),
-          sticky: chant.sticky === 0
+          sticky: chant.sticky === 0,
+          notInPdf: !!chant.notInPdf
         };
         var $curElement;
         $curElement = $('<div>').attr('part',part).addClass('full showing-chant').
@@ -3999,7 +4002,7 @@ $(function(){
     var name = pdfParts.name;
     var result=[];
     var processSolesmes = getProcessSolesmes();
-    pdfParts.parts.forEach(function(pdfPart, i){
+    pdfParts.parts.filter(function(pdfPart) { return !sel[pdfPart.part].notInPdf; }).forEach(function(pdfPart, i){
       var gabc = pdfPart.gabc,
           verses = sel[pdfPart.part+"Verses"],
           gabcVerses = verses && (verses.pdfGabc || verses.activeGabc), // pointed verses are written out in full, as gabc can't have the pointed text
