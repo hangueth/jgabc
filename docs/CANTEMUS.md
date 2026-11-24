@@ -675,7 +675,10 @@ tradução em português; escolher um santo pelo menu carrega o próprio dele.
 - Fica em inglês, de propósito: nomes das notas (C, D…), solfejo móvel (Do, Re, Di, Te…) e
   intervalos (P8, M3) do balão das notas.
 
-**Para o Benjamin (`pt-br`):** tudo menos a seção "My chants" do dicionário e o `my-chants.js`.
+**Para o Benjamin (`pt-br`):** tudo menos a seção "My chants" do dicionário e o `my-chants.js`
+(enviado em 2026-11-24, commit `411594ca`). A tradução do My chants mora no `cantemus` (e no app);
+quando o My chants for proposto, o branch `my-chants` precisa ganhar o `_()` do `my-chants.js` e,
+se o `pt-br` já tiver sido aceito, a seção "My chants" do dicionário.
 
 **Revisão:** `REVISAO-ETAPA3.html` (227 textos).
 
