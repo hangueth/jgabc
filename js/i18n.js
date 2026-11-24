@@ -4,8 +4,9 @@
 //
 // - Rubrics and titles are translated where they are made (makeRubric and the extra chants in propers.js).
 // - The rest of the page is translated as it appears: every text node, <option> and title/placeholder whose whole
-//   (trimmed) text is a key of the "ui" table, also those added later (menus, dialogs), except inside the chant
-//   (svg), the readings, editors and rubrics.
+//   (trimmed) text is a key of the "ui" table, also those added or changed later (menus, dialogs), except inside the
+//   chant (svg), the readings, editors and rubrics.
+// - Scripts can also ask for a translation with I18n.t.
 // - The names of the days in the menus (Proper of the Time, of the Saints, Votive Masses, Commons) go through dayName,
 //   with the "days" table (keyed by the English name, without its date) and "daysByKey" (by the day's key, for the
 //   few English names that stand for two different days).
@@ -148,11 +149,17 @@ var I18n = (function() {
     if(!dictionaries[lang]) return;
     document.documentElement.lang = dictionaries[lang].base || lang;
     translateTree(document.body);
+    // also the titles that change later, e.g. the dark mode button's "Dark mode: On" (the translation isn't a key, so
+    // setting it doesn't start over)
     new MutationObserver(function(mutations) {
       mutations.forEach(function(mutation) {
+        if(mutation.type == 'attributes') {
+          if(!mutation.target.closest(skip)) translateElementAttributes(mutation.target);
+          return;
+        }
         for(var i = 0; i < mutation.addedNodes.length; ++i) translateTree(mutation.addedNodes[i]);
       });
-    }).observe(document.body, { childList: true, subtree: true });
+    }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['title', 'placeholder', 'aria-label'] });
   }
   if(document.readyState == 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
