@@ -306,6 +306,7 @@ I18n.add('pt-BR', {
   "GABC for first verse": "GABC no primeiro versículo",
   "Use large initial": "Usar inicial grande",
   "Only format vowels": "Formatar só as vogais",
+  "Use puncta cava": "Usar puncta cava",
   "Also format punctuation": "Formatar também a pontuação",
   "Dagger Text:": "Texto da flexa (†):",
   "Asterisk Text:": "Texto do asterisco (*):",

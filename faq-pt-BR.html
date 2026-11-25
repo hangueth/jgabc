@@ -1,0 +1,201 @@
+<html lang="pt-BR">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Sobre o Cantemus</title>
+<link rel="icon" href="icon/cantemus-32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="icon/cantemus-16.png" sizes="16x16" type="image/png" />
+<link rel="icon" href="icon/cantemus-192.png" sizes="192x192" type="image/png" />
+<link rel="apple-touch-icon" href="icon/cantemus-180.png" />
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="theme.css" />
+<script src="js/theme.js"></script>
+<script src="js/faq-lang.js"></script>
+<style>
+body {
+  font-family:Verdana,Helvetica,sans-serif;
+}
+div.columns {
+  column-width:8in;
+  column-gap: 1em;
+  column-rule: thin solid gray;
+}
+div.cantemus {
+  border: thin solid gray;
+  border-radius: 6px;
+  padding: 0.5em 1em 1em;
+  margin-bottom: 1.5em;
+}
+div.cantemus ul {
+  padding-left: 1.5em;
+}
+div.question {
+  font-weight:700;
+  margin-top:1em;
+}
+p {
+  margin-top:0;
+}
+body{
+  max-width: 8in;
+  margin:auto;
+}
+</style>
+</head>
+<body>
+<!-- Portuguese translation of faq.html; js/faq-lang.js opens the page in the reader's language. Keep both in step. -->
+<div><a href="javascript:history.back()">Voltar</a></div>
+<div class="cantemus">
+<h1>Sobre o Cantemus</h1>
+<p>O <b>Cantemus</b> é uma versão modificada (um <i>fork</i>) do <a href="https://bbloomf.github.io/jgabc/">Chant Tools</a>,
+de Benjamin Bloomfield (<a href="https://github.com/bbloomf/jgabc">código-fonte</a>). Todo o mérito do Chant Tools em si
+(o Próprio da Missa, os Tons de salmo, as ferramentas de transcrição, o desenho das partituras e os calendários) é dele e
+das pessoas que transcreveram os cantos no <a href="https://gregobase.selapa.net/">GregoBase</a>.</p>
+<p>O Cantemus não pretende concorrer com o Chant Tools nem substituí-lo. É um campo de testes: as novidades são
+experimentadas primeiro com um coro, em Missas de verdade, e as que se mostram úteis são oferecidas de volta ao Chant
+Tools, para que todos aproveitem.</p>
+<div class="question">O que há de diferente aqui?</div>
+<ul>
+  <li><b>Mais cantos ad libitum</b>, como <i>Media vita</i>, <i>Miserere</i>, <i>Venite populi</i>, <i>Gaude Joseph</i>,
+    <i>Jesu corona Virginum</i>, <i>Audi benigne</i> (monástico) e <i>Salve festa dies</i>.</li>
+  <li><b>Meus cantos</b> (<i>My chants</i>): a última opção de cada menu ad libitum acrescenta qualquer canto do GregoBase
+    à sua própria biblioteca, guardada no seu aparelho. A biblioteca pode ser exportada para um arquivo, como cópia de
+    segurança ou para passar a outros cantores, e importada de novo.</li>
+  <li>O <b>Próprio da Missa e as outras ferramentas em português</b>, com a opção de manter em latim os nomes dos dias
+    (o idioma se escolhe no menu ao lado do botão do modo escuro).</li>
+  <li>Um <b>aplicativo para Android</b>, também chamado Cantemus, que pode ser instalado junto com o Chant Tools; os links
+    deste site abrem nele.</li>
+</ul>
+<div class="question">Alguma coisa do Cantemus já chegou ao Chant Tools?</div>
+<div class="answer">Sim: o botão <b>+</b> ao lado de cada menu ad libitum, que acrescenta mais cantos no mesmo momento da
+Missa, foi experimentado aqui primeiro e faz parte do Chant Tools desde a versão 1.19.0
+(<a href="https://github.com/bbloomf/jgabc/pull/127">pull request #127</a>).</div>
+<div class="question">Onde está o código-fonte?</div>
+<div class="answer">Em <a href="https://github.com/hangueth/jgabc">github.com/hangueth/jgabc</a>. Como o Chant Tools, ele é
+de domínio público (<a href="https://unlicense.org/">Unlicense</a>).</div>
+<div class="question">A quem devo perguntar sobre o Cantemus?</div>
+<div class="answer">Mande dúvidas e problemas sobre as novidades acima a quem lhe passou o Cantemus, e não a Benjamin
+Bloomfield: ele não cuida desta versão. As dúvidas sobre o Chant Tools em si são respondidas nas perguntas abaixo.</div>
+</div>
+<p><i>O resto desta página é o FAQ original do Chant Tools, escrito por Benjamin Bloomfield (em inglês) e traduzido para o
+Cantemus. Os nomes de botões e opções são os que aparecem nas páginas em português.</i></p>
+<h1>FAQ (Perguntas Frequentemente Antecipadas)</h1>
+<div class="columns">
+<div class="question">Para que serve isto?</div>
+<div class="answer">São três ferramentas separadas para ajudar a transcrever cantos em notação GABC, e uma quarta que só lida com cantos já transcritos. A primeira se chama "<a href="#transcription">Transcrição GABC</a>" e a segunda, "<a href="#psalmtone">Tons de salmo</a>"; elas são tratadas separadamente abaixo. As outras são as "<a href="#readings">Leituras</a>" e o "<a href="#propers">Próprio da Missa</a>".</div>
+<div class="question">Quem fez isto, e por quê?</div>
+<div class="answer">Meu nome é Benjamin Bloomfield. A schola em que eu canto, em Cincinnati, Ohio, começou a cantar as Vésperas todos os domingos na Quaresma de 2010, mas nem todos nós tínhamos um Liber Usualis para cantar, então fazíamos toda semana cópias do canto e dos salmos com as marcações do Liber Usualis. Pensei em recompor tudo com o <a href='https://gregorio-project.github.io/'>Gregorio</a> e o <a href='https://pt.wikipedia.org/wiki/TeX'>TeX</a>, mas um dos problemas era que formatar o texto dos salmos com certas sílabas em negrito e itálico, à mão, é trabalhoso e fácil de errar. Cantando as Vésperas num domingo de janeiro de 2011, percebi que seria relativamente simples escrever um programa de computador que dividisse automaticamente um texto latino em sílabas e (desde que os acentos já estivessem marcados) aplicasse a ele um tom de salmo ou marcasse certas sílabas em negrito ou itálico. Ao escrever essa ferramenta de Tons de salmo, ficou claro que também valia a pena dividir o latim em sílabas só para não ter de digitar tantos parênteses, e assim nasceu a Transcrição GABC. Montei as Leituras depois que meu pai (diácono permanente) me perguntou como cantar um Evangelho específico em inglês. O Próprio da Missa eu escrevi mais recentemente (em 2013), por sugestão de um dos meus irmãos.</div>
+<div class="question">E a representação gráfica do canto?</div>
+<div class="answer">Eu tinha começado um projeto em maio de 2010, achando que seria simples desenhar GABC numa página da web, mas o abandonei mais tarde naquele ano, pela metade. Quando escrevi estas ferramentas, era natural usar o que eu já tinha meio funcionando para mostrar uma prévia gráfica do canto, e usar esse código de verdade me deu mais ânimo para fazê-lo funcionar melhor, porque é irritante quando ele mostra algo errado; por isso melhorei muito o desenho da prévia desde que escrevi a ferramenta de transcrição. Algumas das ferramentas usam a biblioteca <a href="https://github.com/frmatthew/exsurge">Exsurge</a>, do Padre Matthew Spencer.</div>
+<div class="question">Posso dar uma olhada no código-fonte?</div>
+<div class="answer">Claro. Ele está no GitHub, <a href="https://github.com/bbloomf/jgabc">aqui</a>.</div>
+<div class="question">Alguma destas perguntas foi mesmo feita com frequência?</div>
+<div class="answer">Uma ou duas talvez tenham sido feitas por uma pessoa de verdade, mas com frequência certamente não.</div>
+<div class="question">Dá para usar isto sem estar conectado à Internet?</div>
+<div class="answer">Sim, se você usar ChromeOS ou um aparelho Android ou iOS. A versão de aplicativo para ChromeOS está <a href='https://chrome.google.com/webstore/detail/mkhgaijffgijgkolifpoaijimncdakkd'>aqui</a> e funciona com ou sem conexão; há um aplicativo para Android <a href='https://play.google.com/store/apps/details?id=io.github.bbloomf.jgabc'>aqui</a>, ou você pode baixar <a href='https://github.com/bbloomf/jgabc/releases/latest'>o APK</a>. A versão da App Store para aparelhos iOS pode ser obtida <a href="https://apps.apple.com/in/app/chant-tools/id1225329409">aqui</a>.</div>
+<div class="question">Você aceitaria um pouco do meu dinheiro, como agradecimento por ter montado estas ferramentas?</div>
+<div class="answer">Não é preciso, mas, se você insiste, pode <a href="https://donorbox.org/gabc-tools">me mandar uma doação</a>.</div>
+<div class="question">Qual é a diferença entre "Latim" e "Latim litúrgico" na divisão das sílabas?</div>
+<div class="answer">O <code>Latim litúrgico</code> usa padrões baseados <a href="https://github.com/gregorio-project/hyphen-la">neste projeto</a>, que leva em conta a etimologia, entre outras coisas, ao dividir as sílabas. O <code>Latim</code> usa uma expressão regular que eu escrevi a partir de algumas regras de divisão silábica, e leva em conta alguns prefixos.</div>
+<h2 id="transcription"><a href="transcriber.html">Transcrição GABC</a></h2>
+<div class="question">O que é a Transcrição GABC?</div>
+<div class="answer">É uma ferramenta para escrever notação GABC sem precisar marcar a divisão das sílabas e sem precisar de tantos parênteses. Também é útil para transcrever cantos que repetem a mesma melodia com textos diferentes, como os hinos.</div>
+<div class="question">O que ela faz exatamente?</div>
+<div class="answer"><p>Faz várias coisas. O uso original era simplesmente pegar um texto latino e intercalar nele, depois de cada sílaba, a notação GABC entre parênteses. Ou seja, ela pega os dois textos separados, "c e g g" e "Adoro te", e produz: "A(c)do(e)ro(g) te(g)", poupando a digitação de muitos parênteses.</p>
+  <p>Nos hinos, é útil repetir a melodia em cada estrofe. Também é útil ter seções de melodia e texto, cada uma repetindo a sua melodia sobre todo o seu texto: por exemplo, um hino com várias estrofes seguidas de um "amen" de melodia totalmente diferente. Para isso, separe as seções com uma linha que tenha só dois hifens: "--", assim
+  <blockquote><code>1. texto da primeira estrofe...<br/>2. texto da segunda estrofe<br/>--<br/>Amen.</code></blockquote> no texto e <blockquote><code>GABC das estrofes...<br/>--<br/>GABC do Amen</code></blockquote> no GABC.</p>
+  <p>O GABC da última seção não se repete; então, se você tiver só uma seção e quiser que ela se repita sobre todo o texto, terá de pôr -- como última linha.</p></div>
+<div class="question">Ela funciona ao contrário?</div>
+<div class="answer">Sim, até certo ponto, embora no momento nem sempre funcione muito bem. Se você clicar em "Mostrar GABC integrado" e digitar na caixa única que aparece, ela separa o texto da notação GABC quando você digita ou cola um GABC comum, com o texto e o GABC intercalados por parênteses, e mostra o canto abaixo.</div>
+<div class="question">Como marcar elisões no texto?</div>
+<div class="answer">Para marcar uma elisão no texto do hino, ponha a parte elidida da sílaba entre parênteses. Você pode mudar o comportamento das elisões marcando ou desmarcando a caixa "Usar puncta nas elisões". Se ela estiver marcada, a sílaba elidida recebe um punctum; se estiver desmarcada, a sílaba é simplesmente pulada na hora de atribuir o GABC a cada sílaba.</div>
+<div class="question">O que fazer se ela não dividir minha palavra em sílabas direito?</div>
+<div class="answer">No momento, isso funciona de um jeito diferente conforme o inglês esteja escolhido ou não. Com o inglês, você pode separar as sílabas com um sinal de igual (=), mas, se usar um sinal de igual numa palavra, terá de usá-lo entre todas as sílabas, pois ela não vai mais procurar essa palavra no dicionário. Sem o inglês, você pode usar um hífen (-), e, se usar um hífen, terá de usá-lo também em todas as sílabas à esquerda. Para marcar uma palavra como monossílaba, termine a palavra com um hífen (por exemplo, quo-).</div>
+<div class="question">Há outros recursos que eu deva conhecer?</div>
+<div class="answer">Há pelo menos um que pode ser chamado assim. Ao digitar na caixa de texto, você pode escrever vogais acentuadas digitando um apóstrofo logo depois da vogal (por exemplo, e' vira é). Isso também funciona com as aspas e com as ligaduras de ditongo: e" vira ë, e ae e oe viram æ e œ. Essas trocas não são feitas quando o inglês está escolhido acima da caixa de texto, e podem ser desfeitas com a tecla Backspace (por exemplo, apertar Backspace com o cursor logo à direita de æ troca o æ por ae, sem mover o cursor).</div>
+<div class="question">A propósito da opção de inglês mencionada acima: o que é, e o que ela faz?</div>
+<div class="answer">Ela indica que o texto está em inglês, para que a divisão das sílabas seja feita de outro jeito. A divisão em inglês é feita conferindo cada palavra num dicionário (na verdade, mandando as palavras para o hifenizador de letras de <a href='http://www.juiciobrennan.com/'>este site</a>), e o dicionário local só é atualizado a cada 5 segundos, então às vezes é preciso esperar até as sílabas se dividirem direito.</div>
+<div class="question">Dá para ouvir como o canto soaria?</div>
+<div class="answer">Ah, sim. Se você clicar na inicial grande ou na primeira nota do canto, aparecem opções para escolher a nota inicial e tocar o canto. Se clicar num punctum, ele fica azul e mostra algumas opções. Use os controles que aparecem embaixo da tela para pausar, avançar nota a nota, mudar o andamento ou parar o canto.</div>
+<div class="question">Ela faz mais alguma coisa que você ainda esqueceu de mencionar?</div>
+<div class="answer">Sim, quase me esqueci. Se você clicar na letra ou nas notas do canto segurando uma tecla modificadora (Ctrl, Alt, Shift etc.), o código GABC correspondente fica destacado. Há também um link para gerar um PDF do canto pela interface web do Gregorio, <a href='http://www.sourceandsummit.com/editor/legacy/'>aqui</a>. Esse link fica no canto superior direito e se chama "PDF". O link ao lado (Mais opções de PDF) leva ao mesmo site, mas deixa você mudar configurações, como a fonte usada, antes de gerar o PDF.</div>
+<div class="question">Dá para subir ou descer grupos inteiros de notas?</div>
+<div class="answer">Sim. Segure &lt;Alt> enquanto aperta as setas para cima ou para baixo. Isso só funciona se a caixa do GABC ou do GABC integrado estiver ativa. Se você selecionar parte do GABC, só essa parte se move.</div>
+<div class="question">E o link "Baixar GABC integrado"?</div>
+<div class="answer">Sim, eu devia ter falado dele. Clicando nele você baixa o arquivo GABC, um arquivo de texto com o conteúdo da caixa do GABC integrado, que aparece quando você clica no link "Mostrar GABC integrado", no alto. No Chrome, você pode arrastar esse link para uma janela de pastas, e o arquivo .gabc recebe o nome que estiver no campo name do cabeçalho, se você tiver editado o cabeçalho GABC.</div>
+</div>
+<div class="question">E os outros links de "Baixar"?</div>
+<div class="answer">Ah, sim, eles são acréscimos bem recentes. Eles baixam o canto em <abbr title="Scalable Vector Graphic: gráfico vetorial">SVG</abbr> (resolução ilimitada) ou em <abbr title="Portable Network Graphic: imagem de pixels">PNG</abbr> (resolução limitada). Essas versões são idênticas à prévia mostrada na página e usam a biblioteca <a href="https://github.com/frmatthew/exsurge">Exsurge</a>, e não o <a href='https://gregorio-project.github.io/'>Gregorio</a>, para desenhar o canto; por isso, parte do código GABC não é aceita (por exemplo, as traduções). Se você segurar &lt;Ctrl> (&lt;command> no Mac) ao clicar no link "Baixar PNG", ele baixa um PNG separado para cada pauta. Você também pode definir a largura do PNG/SVG acrescentando ao cabeçalho GABC uma linha como <code>%width: 5in;</code> ou <code>%width: 16cm;</code>. E pode definir o DPI do arquivo PNG com uma linha como <code>%dpi: 600;</code>. O DPI padrão é 300.</div>
+<div class="question">Há outras configurações do cabeçalho que afetam essas exportações em SVG e PNG?</div>
+<div class="answer">Sim. Você pode mudar a fonte com <code>%lyric.font: Helvetica;</code> ou <code>%drop-cap.font: Times New Roman;</code>. Além de <code>drop-cap</code> (a inicial grande) e <code>lyric</code> (a letra), também dá para definir separadamente o estilo de <code>annotation</code> (a anotação). A cor desses textos também pode ser definida: <code>%drop-cap.color: red;</code> deixa a inicial grande vermelha, e <code>%staff-line-color: red;</code> deixa vermelhas as linhas da pauta.</div>
+</div>
+<h2 id="psalmtone"><a href="psalmtone.html">Tons de salmo</a></h2>
+<div class="question">O que é a ferramenta de Tons de salmo?</div>
+<div class="answer">É uma ferramenta para ajudar a transcrever salmos em notação GABC e a formatar os versículos em HTML, TeX ou outro formato.</div>
+<div class="question">Que edição dos salmos você usa?</div>
+<div class="answer">Os salmos (e também o Magnificat e o Benedictus) seguem um Liber Usualis de 1961 (embora possa haver alguns erros), com todas as mediantes e flexas como estão marcadas nele.</div>
+<div class="question">E a caixa "Usar os salmos da Nova Vulgata"?</div>
+<div class="answer">Bem lembrado. Se ela estiver marcada, será usada a edição dos salmos da Nova Vulgata.</div>
+<div class="question">Esta ferramenta tem bem mais opções que a Transcrição GABC, não tem?</div>
+<div class="answer">Tem, sim.</div>
+<div class="question">Vamos vê-las uma por uma?</div>
+<div class="answer">Sim, acho que é o melhor jeito.</div>
+<div class="question">Certo. Comecemos pelo quadrante superior esquerdo da grade no alto. Aquele com o menu do Tom.</div>
+<div class="answer">Pois não. Ali você escolhe o tom a usar, primeiro escolhendo o tom e depois a terminação. Marque a caixa "Tom solene" se quiser o tom solene.</div>
+<div class="question">E as outras coisas do quadrante superior esquerdo?</div>
+<div class="answer">A caixa da clave serve para definir a posição da clave. Ela desloca o canto junto com a clave; então, se você quiser mudar a clave sem deslocar o canto, terá de mudá-la na caixa do GABC, logo acima da prévia do canto.</div>
+<div class="question">Quais são as regras da caixa "GABC do salmo", logo abaixo da caixa da clave?</div>
+<div class="answer">É só o GABC de cada versículo do salmo. A primeira linha é a mediante, e a segunda, a terminação. Os neumas que ficam sobre as sílabas acentuadas levam um apóstrofo na frente, e a corda de recitação é marcada como punctum cavum, com um r. (Isso não afeta o punctum cavum necessário para as sílabas a mais, que pode ou não ter uma sílaba ligada a ele no primeiro versículo do GABC.) Você pode guardar tons próprios com o botão "Criar tom novo"; eles ficam guardados localmente, e assim continuam lá de uma vez para outra, mas só no computador em que você está.</div>
+<div class="question">Como funciona a parte da formatação dos versículos?</div>
+<div class="answer"><p>É onde se ajustam certos aspectos da parte de texto do resultado. Se o nome do formato escolhido tiver GABC, todos os versículos saem em notação GABC. Se não, todos menos o primeiro (e às vezes o segundo) versículo saem como texto formatado, sem GABC. Você também pode ajustar as configurações do primeiro versículo escolhendo GABC e mudando as configurações do lado direito, e depois escolhendo o formato que você quer de fato usar nos versículos seguintes.</p>
+  <p>Os parâmetros do formato de versículo escolhido aparecem à direita ("Antes da sílaba preparatória" etc.), e deve ser bem claro a que se referem. O formato padrão põe as sílabas preparatórias em itálico e as acentuadas em negrito. O "Antes do versículo" é só um texto posto antes de cada versículo ($c é trocado pelo número do versículo atual), e o "Depois do versículo" é simplesmente posto no fim de cada versículo. O espaço inseparável é usado entre uma palavra e a flexa ou a mediante, para evitar uma quebra de linha ali.</p>
+  <p>O "Nome do arquivo dos versículos" é o nome do arquivo quando se arrasta o link "Baixar versículos" do Chrome (nenhum outro navegador permite isso) para uma janela de pastas. Ele também é usado pelo "Baixar ZIP de todos os salmos em cada tom" para nomear os arquivos de versículos. E vai para o campo name do cabeçalho, mas, nesse caso, sem o último ponto e tudo o que vem depois dele (por exemplo, $psalm-$tone.tex vira $psalm-$tone). Além disso, $psalm é trocado pelo número do salmo (ou Magnificat etc.) e $tone pelo tom e pela terminação, por exemplo, 8gstar ou solemn8g.</p>
+  </div>
+  <div class="question">E os versículos (versículo e responsório)?</div>
+  <div class="answer">É só o GABC dos versículos que vêm depois do hino ou do responsório breve, conforme a hora, ou no fim de um noturno das Matinas. Para que a ferramenta funcione, as sílabas preparatórias estão marcadas, mas, se você puser o versículo em gabc, basta preencher as caixas "Antes da sílaba preparatória" e "Depois da sílaba preparatória", que o texto sai na letra comum, como no Liber Usualis.
+	  <p> O tom solene é usado em algumas festas, nas Vésperas, como está indicado nos livros litúrgicos, inclusive no Liber Usualis. Em alguns lugares, é costume usá-lo também em outras festas importantes; isso pode exigir algum ajuste à mão, mas incluir esse tom na ferramenta de Tons de salmo parece mais fácil do que copiar e colar cada sílaba.
+  </p>
+  </div>
+   <div class="question">Pode nos contar sobre os nomes dos tons de salmo?</div>
+   <div class="answer"> Claro. Eles seguem os antifonários, mas alguns tons têm variantes. Nesses casos há uma contradição: "6-alt" é em geral mais comum, mas "per-alt" é bem menos comum, ao menos nos países de língua inglesa e francesa, por influência de Solesmes; mesmo assim, o primeiro nome foi mantido para evitar confusão.
+	   <p> O tom que antes se chamava "in directum" agora é "Tonus T.P.", pois é usado nos salmos ou cânticos sem antífona no Tempo Pascal. Foram acrescentados um tom "in dir. romanus" e o tom especial usado <i>ad libitum</i> nas Horas do Dia de Finados.
+   </p>
+	   </div>
+<div class="question">Você não falou das caixas embaixo do menu "Formatar os versículos como". Para que servem?</div>
+<div class="answer"><p>"Formatar só as vogais" faz que só as vogais das sílabas preparatórias e acentuadas sejam afetadas, e não a sílaba inteira.</p>
+  <p>"Usar puncta cava" faz que se usem puncta cava nas partes de canto do resultado.</p>
+  <p>"Repetir a entoação" faz que a entoação se repita em cada versículo; essa caixa é marcada automaticamente quando se escolhe o Magnificat ou o Benedictus ou quando "Tom solene" está marcado no alto, e desmarcada automaticamente quando se escolhe um salmo.</p>
+</div>
+<div class="question">Há mais alguma coisa que eu deva saber sobre os formatos?</div>
+<div class="answer">Sim, e é simplesmente isto: se o nome do formato tiver html, os versículos são mostrados como html na página; se não, como texto.</div>
+<br/>
+<h2 id="readings"><a href="readings.html">Leituras</a></h2>
+<div class="answer">Escrevi esta ferramenta pouco antes do Advento de 2011, e fiz pequenas mudanças até janeiro de 2012. Não é uma ferramenta que eu mesmo use com frequência, então não tenho tanta certeza de que não haja muitos problemas nela. Os caracteres especiais (usados no Texto ao qual o tom é aplicado) que controlam o resultado são:
+<br><br>
+<b>+</b>: faz usar o tom da flexa (ou, se nenhum tom de flexa for dado, um punctum pontuado na sílaba anterior, com uma barra de quarto logo depois).
+<br/><b>^</b>: põe um punctum pontuado na sílaba anterior, com uma barra de quarto logo depois.
+<br/><b>`</b>: põe uma barra de quarto logo depois, sem pontuar o punctum dessa sílaba.
+<br/><b>~</b> (ou <b>:</b> ou <b>,,</b> ou <b>,</b> seguida de uma linha nova): faz usar o tom da mediante.
+<br/><b>.</b> ou <b>!</b> ou <b>::</b> fazem usar o tom do ponto final.
+<br/><b>?</b> faz usar o tom da pergunta.
+</div>
+<div class="question">De onde vêm os tons?</div>
+<div class="answer">Os tons em inglês vêm dos PDFs indicados <a href="http://www.icelweb.org/musicfolder/openmusic.php">aqui</a>, e os tons latinos, do Liber Usualis.</div>
+<div class="question">O que mais preciso saber para aplicar esses tons a textos em inglês?</div>
+<div class="answer">Primeiro, saiba que as leituras em inglês estão no site da USCCB (a conferência dos bispos dos Estados Unidos), <a href="http://usccb.org/bible/readings/">aqui</a>.
+<br/><br/>Além disso, o que provavelmente é mais trabalhoso e importante ao aplicar tons a textos em inglês é que os acentos não são marcados em inglês e, de fato, muitas vezes são mais vagos do que em latim. A ferramenta de Leituras supõe que o acento cai na última palavra da frase, se ela tiver uma sílaba só; se não, supõe que cai na penúltima sílaba. Mas, se você precisar marcar onde cai o acento, pode pôr um asterisco depois da sílaba que deve ser acentuada, como no texto de exemplo.<br/>
+<br/>Para ajudar nisso, você pode apertar &lt;tab>, e ele seleciona as três últimas sílabas da frase seguinte. Com elas selecionadas, aperte 1, 2 ou 3 para marcar a primeira, a segunda ou a terceira como a sílaba acentuada, e depois &lt;tab> para passar à frase seguinte.</div>
+<h2 id="propers"><a href="propers.html">Próprio da Missa</a></h2>
+<div class="question">O que faz o Próprio da Missa?</div>
+<div class="answer">O Próprio da Missa permite encontrar o próprio de um domingo ou de certas festas e Missas votivas no Liber Usualis. Ele também dá a opção de aplicar um tom de salmo a alguns ou a todos esses cantos e de fazer um PDF.</div>
+<div class="question">Ele aceita o calendário do Novus Ordo, além do calendário tradicional?</div>
+<div class="answer">Sim: clique no botão grande perto do alto para alternar entre o calendário tradicional e o do Novus Ordo. Com o calendário do Novus Ordo, ele deve adivinhar com bom palpite se o ano corrente é o A, o B ou o C, mas há também um menu para mudar o ano que ele está usando.</div>
+<div class="question">Por que há opções a mais para o verso do Aleluia?</div>
+<div class="answer">Em todas as outras partes do próprio, as únicas escolhas são <i>completo</i> ou <i>em tom de salmo</i>, mas, no verso do Aleluia, há uma opção para pôr em tom de salmo só o versículo do salmo, deixando completa a antífona do Aleluia. Há outra opção, "à moda dos Chants Abrégés", que troca a antífona do Aleluia por uma mais simples, tirada dos <a href='http://media.musicasacra.com/pdf/chantsabreges.pdf'>Chants Abrégés</a>, mas usa o mesmo verso em tom de salmo; e a última opção põe em tom de salmo até a antífona do Aleluia.</div>
+<div class="question">Foi você que transcreveu todos estes cantos?</div>
+<div class="answer">Não, não fui eu. Todos vêm do <a href="http://gregobase.selapa.net/">GregoBase</a> e foram transcritos originalmente por Andrew Hinkley. Não há garantia de que estejam livres de erros; se você notar um erro, pode clicar no nome da parte da Missa (Introitus etc.) para ver o canto na página dele no GregoBase e fazer as correções (se você entender GABC), ou simplesmente clicar no link "Report a problem" (relatar um problema), se não souber corrigir sozinho. Para qualquer das duas coisas, é preciso primeiro se cadastrar no site do GregoBase.</div>
+<br/>
+<div class="question">E se eu tiver uma pergunta que não está respondida aqui?</div>
+<div class="answer">Você pode me escrever por e-mail (em inglês), e provavelmente vou responder: bhb123+jgabc [at] gmail.com</div>
+</div>
+</body>
+</html>

@@ -702,7 +702,7 @@ libitum, janelas do My chants com singular/plural, balão das notas, barra de re
 alto, rótulos, botões, dicas (as longas que aparecem ao parar o mouse) e os nomes em inglês dos
 menus de tons e salmos ("Intróito 1", "Profecia", "118.1 (monástico)"). Nomes latinos (salmos,
 cânticos, livros da Bíblia, tons) e os textos de exemplo ficam como estão. O seletor de idioma
-aparece nas quatro páginas. A página **Sobre** (`faq.html`) ainda não foi traduzida.
+aparece nas quatro páginas. A página **Sobre** veio depois (abaixo).
 
 **Como funciona:**
 - As três páginas carregam `js/i18n.js` e `js/i18n-pt-BR.js` logo depois do `js/theme.js`.
@@ -729,6 +729,24 @@ progresso "Generated N of M" do ZIP (texto montado com números) e os textos de 
 **Teste:** `func.mjs` (scratchpad): nas três páginas, em português, inglês e "sem escolha",
 percorre todos os tons (e vários salmos) e compara o GABC gerado com o do código anterior:
 idêntico nos três modos; em inglês e "sem escolha", o texto da página só ganha o seletor de idioma.
+
+
+### Página Sobre (2026-11-25)
+
+**O que faz:** em português, o link "(Sobre)" abre `faq-pt-BR.html`, a tradução inteira de `faq.html` (o quadro do
+Cantemus e o FAQ do Benjamin, em primeira pessoa). Os nomes de botões e opções citados são os das páginas em português.
+
+**Como funciona:** é uma página separada, e não chaves no dicionário, porque o texto é longo e cheio de links e
+negritos no meio das frases (o `i18n.js` só troca nós de texto inteiros). As duas páginas carregam `js/faq-lang.js` no
+`<head>`, que escolhe a página pelo idioma, como o `i18n.js` (`localStorage.lang` ou o idioma do aparelho; `pt-BR` e
+`pt-BR-la` → português) e troca de página com `location.replace`, mantendo o `#` (por exemplo `#psalmtone`).
+A página Sobre não tem o botão do modo escuro, então não tem o seletor de idioma.
+
+**Cuidado:** ao mudar o `faq.html` (inclusive ao trazer mudanças do Benjamin), mudar também o `faq-pt-BR.html`.
+Para o `pt-br` (Benjamin): a mesma página sem o quadro do Cantemus, mais o `js/faq-lang.js`.
+
+**Revisão:** `REVISAO-SOBRE.html` (103 textos). **Teste:** `faq-test.mjs` (scratchpad): os três idiomas e "sem
+escolha" abrem a página certa, com e sem `#`; o "(Sobre)" do Próprio em português abre a tradução.
 
 ---
 
