@@ -586,9 +586,14 @@ cd ../jgabc-cordova && git fetch upstream && git merge upstream/cordova   # part
 O Benjamin usa o próprio Claude e muda bastante o `propers.js`. Quanto menos mexermos nele,
 mais fácil esse passo fica. Por isso o My chants vive em arquivo próprio.
 
+**README:** no `cantemus`, o `README` do Benjamin foi apagado e trocado pelo `README.md` bilíngue
+do Cantemus (capturas em `docs/img/`). Se ele mudar o `README` dele, o merge acusa conflito
+"modificado/apagado": manter apagado (`git rm README`). A cada versão nova, conferir se o
+`README.md` continua certo; os links de download apontam sempre para `releases/latest`.
+
 ---
 
-## 10c. Tradução para o português (etapas 1 a 3)
+## 10c. Tradução para o português (etapas 1 a 4)
 
 **O que faz:** com o idioma em português, a página do Próprio mostra em português as **rubricas**
 (92, quase todas da Semana Santa, Candelária, Cinzas, Rogações e Defuntos), os **títulos** das
@@ -606,13 +611,17 @@ citações nas rubricas, nomes das partes) nunca muda. Os **nomes dos dias** vie
 - `js/i18n-pt-BR.js`: o dicionário (`ui`, `titles`, `rubrics`), chave = texto em inglês
   **exatamente** como no app. Gerado por script a partir do `propersdata.js`, conferindo que as
   citações `< >` e as marcas `v/.`, `r/.`, `[ ]` ficaram iguais.
+  **Texto montado na hora** também precisa de chave para cada resultado possível: o `propers.js`
+  (~866) troca "Full Introit" por `'Full ' + nome latino da parte` quando o canto carrega, por isso
+  o `ui` tem "Full Introitus", "Full Graduale"… (as 11 partes de `partAbbrev`). Para achar sobras
+  assim, listar o texto da página já carregada em português, não só o HTML.
 - `propers.js` (3 linhas): `makeRubric` passa cada rubrica por `I18n.rubric`; o título dos
   cantos extras por `I18n.title`; o botão "Show/Hide" dos cantos extras compara com
   `I18n.t('Show')` (era a única lógica que lia o texto da tela).
 - `propers.html`: carrega os dois arquivos antes do `propers.js`.
 - Vocabulário: `docs/GLOSSARIO-PT.md` (base: Missal Quotidiano de D. Beda Keckeisen, 1947).
 
-**Limitações:** só a página do Próprio (não o transcritor, os tons de salmo, as leituras); as
+**Limitações:** na etapa 1, só a página do Próprio (o transcritor, os tons de salmo e as leituras vieram na etapa 4); as
 janelas do My chants e a barra de reprodução foram traduzidas na etapa 3; o PDF rápido não
 tem rubricas, então não muda. As rubricas precisam de revisão de alguém do coro.
 
@@ -675,13 +684,69 @@ tradução em português; escolher um santo pelo menu carrega o próprio dele.
 - Fica em inglês, de propósito: nomes das notas (C, D…), solfejo móvel (Do, Re, Di, Te…) e
   intervalos (P8, M3) do balão das notas.
 
-**Para o Benjamin (`pt-br`):** tudo menos a seção "My chants" do dicionário e o `my-chants.js`.
+**Para o Benjamin (`pt-br`):** tudo menos a seção "My chants" do dicionário e o `my-chants.js`
+(enviado em 2026-11-24, commit `411594ca`). A tradução do My chants mora no `cantemus` (e no app);
+quando o My chants for proposto, o branch `my-chants` precisa ganhar o `_()` do `my-chants.js` e,
+se o `pt-br` já tiver sido aceito, a seção "My chants" do dicionário.
 
 **Revisão:** `REVISAO-ETAPA3.html` (227 textos).
 
 **Teste:** `check3.mjs` (scratchpad): os três idiomas (modo escuro, Novus Ordo, Ordinários, ad
 libitum, janelas do My chants com singular/plural, balão das notas, barra de reprodução);
 `endiff.mjs`: em inglês e "sem escolha", texto e dicas idênticos aos de antes.
+
+### Etapa 4: as outras páginas (2026-11-25)
+
+**O que faz:** em português, também ficam traduzidas as páginas **Transcrição GABC**
+(`transcriber.html`), **Tons de salmo** (`psalmtone.html`) e **Leituras** (`readings.html`): menu do
+alto, rótulos, botões, dicas (as longas que aparecem ao parar o mouse) e os nomes em inglês dos
+menus de tons e salmos ("Intróito 1", "Profecia", "118.1 (monástico)"). Nomes latinos (salmos,
+cânticos, livros da Bíblia, tons) e os textos de exemplo ficam como estão. O seletor de idioma
+aparece nas quatro páginas. A página **Sobre** veio depois (abaixo).
+
+**Como funciona:**
+- As três páginas carregam `js/i18n.js` e `js/i18n-pt-BR.js` logo depois do `js/theme.js`.
+- Dicionário: seção "the other tools" do `ui`, antes da seção "My chants".
+- `js/i18n.js`:
+  - **Opção sem `value`:** os menus de tons e salmos são criados como `<option>Introit 1</option>`, e
+    o código acha o tom pelo texto (`$('#selTones').val()`). Antes de traduzir o texto de uma
+    opção sem `value`, o tradutor grava o texto original como `value`; assim a página continua
+    achando "Introit 1" quando a tela mostra "Intróito 1".
+  - Traduz também o `value` dos botões `<input type="button">`.
+  - O seletor de idioma se chama `selUiLanguage`: o transcritor já tem um `selLanguage` (idioma da
+    divisão de sílabas), e com o mesmo nome o seletor não aparecia.
+- `psalmtone.html.js` e `readings.js`: `i18nText(texto)` (definida no topo de cada um; sem o
+  `i18n.js`, devolve o próprio texto) nos botões que o código reescreve ("Reset/Delete Tone",
+  "Reset/Delete Current Format").
+- Frase montada em pedaços: "Mediant of 2 accent**s** with 1 preparatory syllable**s**" (o "s" é
+  um pedaço à parte). Em português ficou "Mediante: 2 acentos e 1 preparatória" (plural só no fim).
+
+**Fica em inglês:** as janelas de `prompt`/`confirm` ao criar ou apagar tons e formatos, o
+progresso "Generated N of M" do ZIP (texto montado com números) e os textos de exemplo.
+
+**Revisão:** `REVISAO-ETAPA4.html` (158 textos).
+
+**Teste:** `func.mjs` (scratchpad): nas três páginas, em português, inglês e "sem escolha",
+percorre todos os tons (e vários salmos) e compara o GABC gerado com o do código anterior:
+idêntico nos três modos; em inglês e "sem escolha", o texto da página só ganha o seletor de idioma.
+
+
+### Página Sobre (2026-11-25)
+
+**O que faz:** em português, o link "(Sobre)" abre `faq-pt-BR.html`, a tradução inteira de `faq.html` (o quadro do
+Cantemus e o FAQ do Benjamin, em primeira pessoa). Os nomes de botões e opções citados são os das páginas em português.
+
+**Como funciona:** é uma página separada, e não chaves no dicionário, porque o texto é longo e cheio de links e
+negritos no meio das frases (o `i18n.js` só troca nós de texto inteiros). As duas páginas carregam `js/faq-lang.js` no
+`<head>`, que escolhe a página pelo idioma, como o `i18n.js` (`localStorage.lang` ou o idioma do aparelho; `pt-BR` e
+`pt-BR-la` → português) e troca de página com `location.replace`, mantendo o `#` (por exemplo `#psalmtone`).
+A página Sobre não tem o botão do modo escuro, então não tem o seletor de idioma.
+
+**Cuidado:** ao mudar o `faq.html` (inclusive ao trazer mudanças do Benjamin), mudar também o `faq-pt-BR.html`.
+Para o `pt-br` (Benjamin): a mesma página sem o quadro do Cantemus, mais o `js/faq-lang.js`.
+
+**Revisão:** `REVISAO-SOBRE.html` (103 textos). **Teste:** `faq-test.mjs` (scratchpad): os três idiomas e "sem
+escolha" abrem a página certa, com e sem `#`; o "(Sobre)" do Próprio em português abre a tradução.
 
 ---
 

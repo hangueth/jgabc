@@ -1,3 +1,5 @@
+// the translation of an English text written by this script, when the page has js/i18n.js (otherwise the text itself)
+function i18nText(text) { return window.I18n? I18n.t(text) : text; }
 if(location.search.match(/dominican/i))g_tones=d_tones;
 var selLang = 'latin';
 function selectPsalmLanguage(language) {
@@ -242,7 +244,7 @@ function updateEndings() {
   //update text of delete tone button
   var name = $("#selTones").val();
   var onlyReset = (name in o_g_tones);
-  $("#btnDelTone").val((onlyReset?"Reset":"Delete") + " Tone")
+  $("#btnDelTone").val(i18nText((onlyReset?"Reset":"Delete") + " Tone"))
     .attr("disabled",onlyReset && JSON.stringify(o_g_tones[name])==JSON.stringify(g_tones[name]));
 
   $("#selEnd").empty();
@@ -377,7 +379,7 @@ function updateFormat() {
   useFormat = $("#selFormat").val();
   gabcFormat = bi_formats["gabc-" + useFormat.slice(useFormat.lastIndexOf("-")+1)];
   localStorage.selFormat = useFormat;
-  $("#btnDelFormat").val(((useFormat in o_bi_formats)? "Reset" : "Delete") + " Current Format");
+  $("#btnDelFormat").val(i18nText(((useFormat in o_bi_formats)? "Reset" : "Delete") + " Current Format"));
   var f = bi_formats[useFormat];
   if(!f.flex) f.flex = ['','','',''];
   var useGabcFormat = /^gabc(?:$|-)/.test(useFormat);

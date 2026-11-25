@@ -1,3 +1,5 @@
+// the translation of an English text written by this script, when the page has js/i18n.js (otherwise the text itself)
+function i18nText(text) { return window.I18n? I18n.t(text) : text; }
 var readingIntroductions = {
   "Lucas": `Se(h)quén(h)ti(h)a(h) sánc(h)ti(f) E(h)van(g)gé(g)li(h)i(h.) (,) se(h)cún(h)dum(h) Lu(g.)cam.(g.) (::) In(f) il(h)lo(g) tém(g)po(h)re:(h.) (;)`,
   "Marcus": `Se(h)quén(h)ti(h)a(h) sánc(h)ti(f) E(h)van(g)gé(g)li(h)i(h.) (,) se(h)cún(h)dum(h) Mar(g.)cum.(g.) (::) In(f) il(h)lo(g) tém(g)po(h)re:(h.) (;)`,
@@ -259,7 +261,7 @@ function updateFormat() {
   useFormat = $("#selFormat").val();
   gabcFormat = bi_formats["gabc-" + useFormat.slice(useFormat.lastIndexOf("-")+1)];
   localStorage.selFormat = useFormat;
-  $("#btnDelFormat").val(((useFormat in o_bi_formats)? "Reset" : "Delete") + " Current Format");
+  $("#btnDelFormat").val(i18nText(((useFormat in o_bi_formats)? "Reset" : "Delete") + " Current Format"));
   var f = bi_formats[useFormat];
   $("#txtBeginPrep").val(f.italic[0]);
   $("#txtEndPrep").val(f.italic[1]);
