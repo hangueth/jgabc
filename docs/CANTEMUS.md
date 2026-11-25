@@ -611,6 +611,10 @@ citações nas rubricas, nomes das partes) nunca muda. Os **nomes dos dias** vie
 - `js/i18n-pt-BR.js`: o dicionário (`ui`, `titles`, `rubrics`), chave = texto em inglês
   **exatamente** como no app. Gerado por script a partir do `propersdata.js`, conferindo que as
   citações `< >` e as marcas `v/.`, `r/.`, `[ ]` ficaram iguais.
+  **Texto montado na hora** também precisa de chave para cada resultado possível: o `propers.js`
+  (~866) troca "Full Introit" por `'Full ' + nome latino da parte` quando o canto carrega, por isso
+  o `ui` tem "Full Introitus", "Full Graduale"… (as 11 partes de `partAbbrev`). Para achar sobras
+  assim, listar o texto da página já carregada em português, não só o HTML.
 - `propers.js` (3 linhas): `makeRubric` passa cada rubrica por `I18n.rubric`; o título dos
   cantos extras por `I18n.title`; o botão "Show/Hide" dos cantos extras compara com
   `I18n.t('Show')` (era a única lógica que lia o texto da tela).
