@@ -1,4 +1,4 @@
-// I18n: translates the Propers Tool's English texts (the interface, the rubrics and the titles of the extra chants)
+// I18n: translates the English texts of the Propers Tool and of the other tools (transcriber, psalm tones, readings) (the interface, the rubrics and the titles of the extra chants)
 // with a dictionary of "English → translation" pairs, e.g. js/i18n-pt-BR.js; Latin and the chant itself are never
 // touched. Anything missing from the dictionary stays in English, so a partial dictionary is safe.
 //
@@ -92,14 +92,25 @@ var I18n = (function() {
         if(translated !== value) el.setAttribute(name, translated);
       }
     });
+    // buttons written as <input type="button" value="…">
+    if(el.tagName == 'INPUT' && /^(button|submit|reset)$/i.test(el.type) && el.value) {
+      var translatedValue = t(el.value);
+      if(translatedValue !== el.value) el.value = translatedValue;
+    }
+  }
+  // An <option> without a value attribute has its text as its value (psalmtone.html.js and readings.js find the tones
+  // and psalms by it), so the English text is kept as the value before the text is translated.
+  function translateTextNode(node) {
+    var value = node.nodeValue, translated = t(value);
+    if(translated === value) return;
+    var parent = node.parentNode;
+    if(parent && parent.tagName == 'OPTION' && !parent.hasAttribute('value')) parent.setAttribute('value', parent.value);
+    node.nodeValue = translated;
   }
   function translateTree(root) {
     if(!dictionaries[lang] || !root) return;
     if(root.nodeType == 3) {
-      if(root.parentNode && root.parentNode.closest && !root.parentNode.closest(skip)) {
-        var translated = t(root.nodeValue);
-        if(translated !== root.nodeValue) root.nodeValue = translated;
-      }
+      if(root.parentNode && root.parentNode.closest && !root.parentNode.closest(skip)) translateTextNode(root);
       return;
     }
     if(root.nodeType != 1 || root.closest(skip)) return;
@@ -113,20 +124,17 @@ var I18n = (function() {
     var node;
     while((node = walker.nextNode())) {
       if(node.nodeType == 1) translateElementAttributes(node);
-      else {
-        var value = node.nodeValue, translated = t(value);
-        if(translated !== value) node.nodeValue = translated;
-      }
+      else translateTextNode(node);
     }
   }
 
   // the language menu, next to the dark mode button
   function addLanguageMenu() {
-    if(languages.length < 2 || document.getElementById('selLanguage')) return;
+    if(languages.length < 2 || document.getElementById('selUiLanguage')) return;
     var anchor = document.querySelector('.dark-mode-toggle');
     if(!anchor) return;
     var select = document.createElement('select');
-    select.id = 'selLanguage';
+    select.id = 'selUiLanguage'; // not selLanguage: the transcriber's menu of syllabification languages has that id
     select.className = 'no-i18n';
     select.title = 'Language / Idioma';
     select.style.cssText = 'margin-left: 6px; font-size: 12px; vertical-align: middle;';

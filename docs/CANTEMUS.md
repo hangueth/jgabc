@@ -593,7 +593,7 @@ do Cantemus (capturas em `docs/img/`). Se ele mudar o `README` dele, o merge acu
 
 ---
 
-## 10c. Tradução para o português (etapas 1 a 3)
+## 10c. Tradução para o português (etapas 1 a 4)
 
 **O que faz:** com o idioma em português, a página do Próprio mostra em português as **rubricas**
 (92, quase todas da Semana Santa, Candelária, Cinzas, Rogações e Defuntos), os **títulos** das
@@ -621,7 +621,7 @@ citações nas rubricas, nomes das partes) nunca muda. Os **nomes dos dias** vie
 - `propers.html`: carrega os dois arquivos antes do `propers.js`.
 - Vocabulário: `docs/GLOSSARIO-PT.md` (base: Missal Quotidiano de D. Beda Keckeisen, 1947).
 
-**Limitações:** só a página do Próprio (não o transcritor, os tons de salmo, as leituras); as
+**Limitações:** na etapa 1, só a página do Próprio (o transcritor, os tons de salmo e as leituras vieram na etapa 4); as
 janelas do My chants e a barra de reprodução foram traduzidas na etapa 3; o PDF rápido não
 tem rubricas, então não muda. As rubricas precisam de revisão de alguém do coro.
 
@@ -694,6 +694,41 @@ se o `pt-br` já tiver sido aceito, a seção "My chants" do dicionário.
 **Teste:** `check3.mjs` (scratchpad): os três idiomas (modo escuro, Novus Ordo, Ordinários, ad
 libitum, janelas do My chants com singular/plural, balão das notas, barra de reprodução);
 `endiff.mjs`: em inglês e "sem escolha", texto e dicas idênticos aos de antes.
+
+### Etapa 4: as outras páginas (2026-11-25)
+
+**O que faz:** em português, também ficam traduzidas as páginas **Transcrição GABC**
+(`transcriber.html`), **Tons de salmo** (`psalmtone.html`) e **Leituras** (`readings.html`): menu do
+alto, rótulos, botões, dicas (as longas que aparecem ao parar o mouse) e os nomes em inglês dos
+menus de tons e salmos ("Intróito 1", "Profecia", "118.1 (monástico)"). Nomes latinos (salmos,
+cânticos, livros da Bíblia, tons) e os textos de exemplo ficam como estão. O seletor de idioma
+aparece nas quatro páginas. A página **Sobre** (`faq.html`) ainda não foi traduzida.
+
+**Como funciona:**
+- As três páginas carregam `js/i18n.js` e `js/i18n-pt-BR.js` logo depois do `js/theme.js`.
+- Dicionário: seção "the other tools" do `ui`, antes da seção "My chants".
+- `js/i18n.js`:
+  - **Opção sem `value`:** os menus de tons e salmos são criados como `<option>Introit 1</option>`, e
+    o código acha o tom pelo texto (`$('#selTones').val()`). Antes de traduzir o texto de uma
+    opção sem `value`, o tradutor grava o texto original como `value`; assim a página continua
+    achando "Introit 1" quando a tela mostra "Intróito 1".
+  - Traduz também o `value` dos botões `<input type="button">`.
+  - O seletor de idioma se chama `selUiLanguage`: o transcritor já tem um `selLanguage` (idioma da
+    divisão de sílabas), e com o mesmo nome o seletor não aparecia.
+- `psalmtone.html.js` e `readings.js`: `i18nText(texto)` (definida no topo de cada um; sem o
+  `i18n.js`, devolve o próprio texto) nos botões que o código reescreve ("Reset/Delete Tone",
+  "Reset/Delete Current Format").
+- Frase montada em pedaços: "Mediant of 2 accent**s** with 1 preparatory syllable**s**" (o "s" é
+  um pedaço à parte). Em português ficou "Mediante: 2 acentos e 1 preparatória" (plural só no fim).
+
+**Fica em inglês:** as janelas de `prompt`/`confirm` ao criar ou apagar tons e formatos, o
+progresso "Generated N of M" do ZIP (texto montado com números) e os textos de exemplo.
+
+**Revisão:** `REVISAO-ETAPA4.html` (158 textos).
+
+**Teste:** `func.mjs` (scratchpad): nas três páginas, em português, inglês e "sem escolha",
+percorre todos os tons (e vários salmos) e compara o GABC gerado com o do código anterior:
+idêntico nos três modos; em inglês e "sem escolha", o texto da página só ganha o seletor de idioma.
 
 ---
 
